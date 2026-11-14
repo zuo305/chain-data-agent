@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { vi } from "vitest";
-import { PUBLIC_RPC_URL } from "../../src/datasets/solana-validators/rpc";
+import { FALLBACK_RPC_URLS } from "../../src/datasets/solana-validators/rpc";
 
 // Real mainnet-beta snapshot trimmed to 31 validators (28 current, 3 delinquent) (see fixtures/solana)
 export function solanaSnapshot() {
@@ -27,7 +27,7 @@ export function stubSolanaRpc(options: { fail?: boolean } = {}) {
   const realFetch = globalThis.fetch;
   const mock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    if (url !== PUBLIC_RPC_URL) return realFetch(input, init);
+    if (!FALLBACK_RPC_URLS.includes(url)) return realFetch(input, init);
     if (options.fail) return new Response("rate limited", { status: 429 });
     const { method } = JSON.parse(String(init?.body));
     return Response.json({ jsonrpc: "2.0", id: 1, result: results[method] });

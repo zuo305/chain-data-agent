@@ -6,6 +6,10 @@ import type { Bindings } from "../../types";
 // the full vote account list costs about 2 ms of CPU.
 
 export const PUBLIC_RPC_URL = "https://api.mainnet-beta.solana.com";
+// Free endpoints without an API key, tried in order after SOLANA_RPC_URL.
+// Each may block or rate limit Cloudflare's egress addresses, so a failure
+// moves on to the next one.
+export const FALLBACK_RPC_URLS = [PUBLIC_RPC_URL, "https://solana-rpc.publicnode.com"];
 export const RPC_CACHE_SECONDS = 60;
 const RPC_TIMEOUT_MS = 8_000;
 
@@ -14,8 +18,6 @@ export class RpcUnavailableError extends Error {}
 type RpcResponse<T> = { result?: T; error?: { code: number; message: string } };
 
 export async function rpcCall<T>(env: Bindings, method: string, params: unknown[] = []): Promise<T> {
-  const url = env.SOLANA_RPC_URL?.trim() || PUBLIC_RPC_URL;
-  const body = JSON.stringify({ jsonrpc: "2.0", id: 1, method, params });
   const cache = workersCache();
   // Synthetic GET key: the Cache API only stores GET requests. The RPC URL
   // is not part of the key, so a configured API key never reaches the cache.
@@ -25,32 +27,50 @@ export async function rpcCall<T>(env: Bindings, method: string, params: unknown[
     if (hit) return (await hit.json()) as T;
   }
 
+  const configured = env.SOLANA_RPC_URL?.trim();
+  const endpoints = configured ? [configured, ...FALLBACK_RPC_URLS] : FALLBACK_RPC_URLS;
+  const failures: string[] = [];
+  for (const url of endpoints) {
+    try {
+      const result = await callEndpoint<T>(url, method, params);
+      if (cache) {
+        const stored = new Response(JSON.stringify(result), {
+          headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${RPC_CACHE_SECONDS}` },
+        });
+        await cache.put(key, stored).catch(() => undefined);
+      }
+      return result;
+    } catch (err) {
+      if (!(err instanceof RpcUnavailableError)) throw err;
+      // A configured URL may embed an API key: never name it
+      const label = url === configured ? "configured endpoint" : new URL(url).host;
+      failures.push(`${label} ${err.message}`);
+    }
+  }
+  throw new RpcUnavailableError(`${method}: ${failures.join("; ")}`);
+}
+
+async function callEndpoint<T>(url: string, method: string, params: unknown[]): Promise<T> {
   let res: Response;
   try {
     res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body,
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
       signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
     });
   } catch (err) {
-    throw new RpcUnavailableError(`${method}: ${err instanceof Error ? err.message : String(err)}`);
+    throw new RpcUnavailableError(err instanceof Error ? err.message : String(err));
   }
-  if (!res.ok) throw new RpcUnavailableError(`${method}: HTTP ${res.status}`);
+  if (!res.ok) throw new RpcUnavailableError(`HTTP ${res.status}`);
   let json: RpcResponse<T>;
   try {
     json = (await res.json()) as RpcResponse<T>;
   } catch {
-    throw new RpcUnavailableError(`${method}: response is not JSON`);
+    throw new RpcUnavailableError("response is not JSON");
   }
   if (json.error || json.result === undefined) {
-    throw new RpcUnavailableError(`${method}: ${json.error?.message ?? "empty result"}`);
-  }
-  if (cache) {
-    const stored = new Response(JSON.stringify(json.result), {
-      headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${RPC_CACHE_SECONDS}` },
-    });
-    await cache.put(key, stored).catch(() => undefined);
+    throw new RpcUnavailableError(json.error?.message ?? "empty result");
   }
   return json.result;
 }

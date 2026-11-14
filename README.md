@@ -82,9 +82,13 @@ Notes:
   per SOL relative to the cluster median (validators under 1,000 SOL are
   left out of the median). This uses today's stake, so validators whose
   stake changed recently look better or worse than they were.
-- The public RPC endpoint is rate limited per IP and not meant for
-  production. `SOLANA_RPC_URL` switches to another endpoint (a free-tier
-  provider key goes in a Secret, not in `wrangler.toml`).
+- RPC endpoints are tried in order: `SOLANA_RPC_URL` (if set), the public
+  `api.mainnet-beta.solana.com`, then PublicNode's free
+  `solana-rpc.publicnode.com`; a 503 `upstream_unavailable` names each host
+  and why it failed. On the first deploy (2026-11-14) the Worker could not
+  get an answer from the public endpoint although it works from elsewhere
+  (likely blocking or rate limiting Cloudflare egress), hence the fallback.
+  A free-tier provider key goes in a Secret, not in `wrangler.toml`.
 
 ## Data sources
 

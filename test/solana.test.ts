@@ -220,3 +220,31 @@ describe("solana-validators endpoints", () => {
     expect(res.status).toBe(503);
   });
 });
+
+describe("RPC fallback", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("moves on to the next free endpoint when one refuses, and never names a configured URL", async () => {
+    const { rpcCall } = await import("../src/datasets/solana-validators/rpc");
+    const snap = solanaSnapshot();
+    const seen: string[] = [];
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const url = String(input);
+      seen.push(url);
+      if (url.includes("publicnode")) return Response.json({ jsonrpc: "2.0", id: 1, result: snap.epochInfo });
+      return new Response("forbidden", { status: 403 });
+    });
+    const env = { SOLANA_RPC_URL: "https://rpc.example.test/?api-key=secret" } as never;
+    await expect(rpcCall(env, "getEpochInfo")).resolves.toEqual(snap.epochInfo);
+    expect(seen).toEqual([
+      "https://rpc.example.test/?api-key=secret",
+      "https://api.mainnet-beta.solana.com",
+      "https://solana-rpc.publicnode.com",
+    ]);
+
+    vi.stubGlobal("fetch", async () => new Response("forbidden", { status: 403 }));
+    const err = await rpcCall(env, "getEpochInfo").catch((e: Error) => e);
+    expect(String(err)).toContain("configured endpoint HTTP 403; api.mainnet-beta.solana.com HTTP 403");
+    expect(String(err)).not.toContain("secret");
+  });
+});

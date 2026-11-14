@@ -50,7 +50,7 @@ describe("usage logging", () => {
       await Promise.all(pending);
       const row = db.sqlite.prepare("SELECT status, detail FROM usage_log WHERE path = '/v1/solana-validators/summary'").get() as any;
       expect(row.status).toBe(503);
-      expect(row.detail).toContain("[upstream] getEpochInfo: boom");
+      expect(row.detail).toContain("[upstream] getEpochInfo: api.mainnet-beta.solana.com boom; solana-rpc.publicnode.com boom");
     } finally {
       vi.unstubAllGlobals();
       vi.restoreAllMocks();

@@ -87,7 +87,11 @@ async function withSnapshot(c: Context<AppEnv>, fn: (s: ChainSnapshot) => Respon
     if (!(err instanceof RpcUnavailableError)) throw err;
     c.set("logDetail", appendLogDetail(c.get("logDetail"), `[upstream] ${err.message}`.slice(0, 200)));
     return c.json(
-      { error: "upstream_unavailable", message: "The Solana RPC endpoint did not answer; retry shortly." },
+      {
+        error: "upstream_unavailable",
+        message: "No Solana RPC endpoint answered; retry shortly.",
+        detail: err.message.slice(0, 300),
+      },
       503,
       { "Retry-After": "5" }
     );
