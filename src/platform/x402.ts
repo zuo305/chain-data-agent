@@ -289,6 +289,8 @@ export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
         {
           error: "payment_facilitator_unavailable",
           message: "The x402 payment facilitator could not be reached. No payment was taken; retry in a few seconds.",
+          // What the x402 middleware reported (masked, no credentials)
+          detail: errorDetail(reported ?? "unknown"),
         },
         503,
         { "Retry-After": "5" }
