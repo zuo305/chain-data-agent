@@ -25,7 +25,7 @@ export const ATTRIBUTION: Attribution = {
   licenceUrl: "https://solana.com/docs/rpc",
   text:
     "Computed from Solana mainnet-beta chain state (getVoteAccounts, getEpochInfo, getBlockProduction). " +
-    `Values are at most ${RPC_CACHE_SECONDS} seconds old.`,
+    `Values are normally at most ${RPC_CACHE_SECONDS} seconds old; meta.data_age_seconds gives the age.`,
 };
 
 const DEFAULT_LIMIT = 20;
@@ -79,6 +79,11 @@ function readListInput(c: Context<AppEnv>): ListInput | string {
 }
 
 // Runs a handler on a fresh snapshot; an unreachable RPC answers 503
+// Seconds since the snapshot was fetched, for meta.data_age_seconds
+export function dataAge(s: ChainSnapshot): number {
+  return s.fetchedAt === undefined ? 0 : Math.max(0, Math.round((Date.now() - s.fetchedAt) / 1000));
+}
+
 async function withSnapshot(c: Context<AppEnv>, fn: (s: ChainSnapshot) => Response): Promise<Response> {
   let snapshot: ChainSnapshot;
   try {
@@ -120,7 +125,7 @@ export const solanaValidators: Dataset = {
         "stake), median commission, cluster block production and skip rate so far this epoch, and median and best " +
         "vote credits per SOL staked in the last complete epoch. Use it as the baseline when judging a single validator.",
       outputExample: SUMMARY_EXAMPLE,
-      handler: (c) => withSnapshot(c, (s) => dataResponse(c, solanaValidators, networkSummary(s))),
+      handler: (c) => withSnapshot(c, (s) => dataResponse(c, solanaValidators, networkSummary(s), { data_age_seconds: dataAge(s) })),
     },
     {
       method: "GET",
@@ -151,7 +156,7 @@ export const solanaValidators: Dataset = {
               404
             );
           }
-          return dataResponse(c, solanaValidators, validatorStats(s, v));
+          return dataResponse(c, solanaValidators, validatorStats(s, v), { data_age_seconds: dataAge(s) });
         });
       },
       preview: async (c) => {
@@ -198,6 +203,7 @@ export const solanaValidators: Dataset = {
             sort: input.sort,
             credits_epoch,
             epoch: s.epochInfo.epoch,
+            data_age_seconds: dataAge(s),
           });
         });
       },

@@ -248,3 +248,43 @@ describe("RPC fallback", () => {
     expect(String(err)).not.toContain("secret");
   });
 });
+
+describe("RPC cache", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  // Minimal stand-in for caches.default (Workers runtime only)
+  function stubCache() {
+    const store = new Map<string, string>();
+    vi.stubGlobal("caches", {
+      default: {
+        match: async (req: Request) => (store.has(req.url) ? new Response(store.get(req.url)) : undefined),
+        put: async (req: Request, res: Response) => void store.set(req.url, await res.text()),
+      },
+    });
+  }
+
+  it("serves a fresh answer from the cache, and a stale one with its age when every endpoint refuses", async () => {
+    const { rpcCallTimed, RPC_CACHE_SECONDS } = await import("../src/datasets/solana-validators/rpc");
+    const snap = solanaSnapshot();
+    stubCache();
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-14T00:00:00Z"));
+    let calls = 0;
+    vi.stubGlobal("fetch", async () => {
+      calls++;
+      return Response.json({ jsonrpc: "2.0", id: 1, result: snap.epochInfo });
+    });
+    const first = await rpcCallTimed({} as never, "getEpochInfo");
+    await rpcCallTimed({} as never, "getEpochInfo");
+    expect(calls).toBe(1);
+
+    vi.setSystemTime(new Date(Date.now() + (RPC_CACHE_SECONDS + 600) * 1000));
+    vi.stubGlobal("fetch", async () => new Response("too many requests", { status: 429 }));
+    const stale = await rpcCallTimed({} as never, "getEpochInfo");
+    expect(stale.result).toEqual(snap.epochInfo);
+    expect(stale.fetchedAt).toBe(first.fetchedAt);
+  });
+});

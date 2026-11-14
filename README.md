@@ -72,8 +72,9 @@ test/                         # Vitest unit tests
 
 Notes:
 - Data is computed on each call from `getVoteAccounts`, `getEpochInfo` and
-  `getBlockProduction` (mainnet-beta). RPC results are cached for 60 s in
-  the Workers cache, so values are at most a minute old.
+  `getBlockProduction` (mainnet-beta). RPC results are fresh for 60 s in the
+  Workers cache; when every endpoint refuses, an answer up to 1 hour old is
+  served instead. Every response has `meta.data_age_seconds`.
 - Measured 2026-11-14: `getVoteAccounts` is ~315 KB for ~700 validators.
   Parsing plus computing takes ~3 ms warm, 4–7 ms cold (free plan limit:
   10 ms CPU per request).
@@ -88,7 +89,11 @@ Notes:
   and why it failed. On the first deploy (2026-11-14) the Worker could not
   get an answer from the public endpoint although it works from elsewhere
   (likely blocking or rate limiting Cloudflare egress), hence the fallback.
-  A free-tier provider key goes in a Secret, not in `wrangler.toml`.
+  The next request then got 403 (official) and 429 (PublicNode) for
+  `getBlockProduction` only, and succeeded a minute later: the free
+  endpoints rate limit Cloudflare's shared egress intermittently, hence the
+  stale fallback. A free-tier provider key goes in a Secret, not in
+  `wrangler.toml`.
 
 ## Data sources
 

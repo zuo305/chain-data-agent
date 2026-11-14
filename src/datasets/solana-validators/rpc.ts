@@ -1,9 +1,12 @@
 import type { Bindings } from "../../types";
 
-// Minimal Solana JSON-RPC client. Responses are kept in the Workers cache
-// for a short time so bursts of calls (and the free 402 previews) share one
-// upstream request: the public endpoint is rate limited per IP, and parsing
-// the full vote account list costs about 2 ms of CPU.
+// Minimal Solana JSON-RPC client. Responses are kept in the Workers cache so
+// bursts of calls (and the free 402 previews) share one upstream request:
+// the free endpoints rate limit Cloudflare's shared egress addresses, and
+// parsing the full vote account list costs about 2 ms of CPU. A cached
+// answer is fresh for RPC_CACHE_SECONDS; when every endpoint refuses, an
+// answer up to RPC_STALE_SECONDS old is served instead, and its age is
+// reported to the caller.
 
 export const PUBLIC_RPC_URL = "https://api.mainnet-beta.solana.com";
 // Free endpoints without an API key, tried in order after SOLANA_RPC_URL.
@@ -11,20 +14,30 @@ export const PUBLIC_RPC_URL = "https://api.mainnet-beta.solana.com";
 // moves on to the next one.
 export const FALLBACK_RPC_URLS = [PUBLIC_RPC_URL, "https://solana-rpc.publicnode.com"];
 export const RPC_CACHE_SECONDS = 60;
+export const RPC_STALE_SECONDS = 3_600;
 const RPC_TIMEOUT_MS = 8_000;
 
 export class RpcUnavailableError extends Error {}
 
 type RpcResponse<T> = { result?: T; error?: { code: number; message: string } };
 
+export type Timed<T> = { result: T; fetchedAt: number };
+
 export async function rpcCall<T>(env: Bindings, method: string, params: unknown[] = []): Promise<T> {
+  return (await rpcCallTimed<T>(env, method, params)).result;
+}
+
+// Result with the time it was fetched (ms since epoch), from the cache when fresh
+export async function rpcCallTimed<T>(env: Bindings, method: string, params: unknown[] = []): Promise<Timed<T>> {
   const cache = workersCache();
   // Synthetic GET key: the Cache API only stores GET requests. The RPC URL
   // is not part of the key, so a configured API key never reaches the cache.
   const key = new Request(`https://solana-rpc.cache/${method}?p=${encodeURIComponent(JSON.stringify(params))}`);
+  let cached: Timed<T> | undefined;
   if (cache) {
     const hit = await cache.match(key);
-    if (hit) return (await hit.json()) as T;
+    if (hit) cached = (await hit.json()) as Timed<T>;
+    if (cached && Date.now() - cached.fetchedAt < RPC_CACHE_SECONDS * 1000) return cached;
   }
 
   const configured = env.SOLANA_RPC_URL?.trim();
@@ -32,14 +45,14 @@ export async function rpcCall<T>(env: Bindings, method: string, params: unknown[
   const failures: string[] = [];
   for (const url of endpoints) {
     try {
-      const result = await callEndpoint<T>(url, method, params);
+      const fresh: Timed<T> = { result: await callEndpoint<T>(url, method, params), fetchedAt: Date.now() };
       if (cache) {
-        const stored = new Response(JSON.stringify(result), {
-          headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${RPC_CACHE_SECONDS}` },
+        const stored = new Response(JSON.stringify(fresh), {
+          headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${RPC_STALE_SECONDS}` },
         });
         await cache.put(key, stored).catch(() => undefined);
       }
-      return result;
+      return fresh;
     } catch (err) {
       if (!(err instanceof RpcUnavailableError)) throw err;
       // A configured URL may embed an API key: never name it
@@ -47,6 +60,7 @@ export async function rpcCall<T>(env: Bindings, method: string, params: unknown[
       failures.push(`${label} ${err.message}`);
     }
   }
+  if (cached) return cached;
   throw new RpcUnavailableError(`${method}: ${failures.join("; ")}`);
 }
 
@@ -120,14 +134,21 @@ export type ChainSnapshot = {
   epochInfo: RawEpochInfo;
   voteAccounts: RawVoteAccounts;
   blockProduction: RawBlockProduction;
+  // When the oldest of the three answers was fetched (ms since epoch)
+  fetchedAt?: number;
 };
 
 export async function fetchSnapshot(env: Bindings): Promise<ChainSnapshot> {
   const commitment = { commitment: "confirmed" };
   const [epochInfo, voteAccounts, blockProduction] = await Promise.all([
-    rpcCall<RawEpochInfo>(env, "getEpochInfo", [commitment]),
-    rpcCall<RawVoteAccounts>(env, "getVoteAccounts", [commitment]),
-    rpcCall<RawBlockProduction>(env, "getBlockProduction", [commitment]),
+    rpcCallTimed<RawEpochInfo>(env, "getEpochInfo", [commitment]),
+    rpcCallTimed<RawVoteAccounts>(env, "getVoteAccounts", [commitment]),
+    rpcCallTimed<RawBlockProduction>(env, "getBlockProduction", [commitment]),
   ]);
-  return { epochInfo, voteAccounts, blockProduction };
+  return {
+    epochInfo: epochInfo.result,
+    voteAccounts: voteAccounts.result,
+    blockProduction: blockProduction.result,
+    fetchedAt: Math.min(epochInfo.fetchedAt, voteAccounts.fetchedAt, blockProduction.fetchedAt),
+  };
 }
