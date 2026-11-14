@@ -1,9 +1,8 @@
 // Identity of this service, used by the platform for the site, MCP server
 // info, discovery files and x402 metadata. Datasets stay in src/datasets/.
 
-// Public origin of the deployed Worker.
-// TODO: set to the real workers.dev URL once the Cloudflare account exists.
-export const BASE_URL = "https://chain-data-agent.workers.dev";
+// Public origin of the deployed Worker
+export const BASE_URL = "https://chain-data-agent.wangzuo305.workers.dev";
 
 export const SERVICE = {
   // Shown for paid resources in the x402 Bazaar (max 32 printable ASCII chars)

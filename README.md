@@ -141,8 +141,9 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [x] Consolidated platform migration (`0001_platform.sql`)
 - [x] First dataset: Solana validator stats, computed live (1 free, 2 paid endpoints)
 - [x] New Cloudflare account (free) and D1 database `chain-data-agent` (Eastern North America, 2026-11-14)
-- [ ] Workers Builds connected to `main`
-- [ ] Real `BASE_URL` in `src/service.ts`; check CPU time per request in production
+- [x] Workers Builds connected to `main`; first deploy 2026-11-14
+- [x] Real `BASE_URL` in `src/service.ts`: https://chain-data-agent.wangzuo305.workers.dev
+- [ ] Check RPC access and CPU time per request in production
 - [ ] Payee wallet, CDP API key, Base mainnet
 - [ ] `server.json` and MCP Registry listing (workflow is ready; it runs when `server.json` is added)
 
