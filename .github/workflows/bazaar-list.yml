@@ -1,0 +1,30 @@
+name: List in x402 Bazaar
+
+# Pays once for every paid HTTP route and MCP tool so the CDP Bazaar lists
+# them (it catalogues a resource only after a payment settles through CDP).
+# Manual only. Needs the repository secret PAYER_PRIVATE_KEY: a dedicated
+# wallet holding a little USDC on Base mainnet (never the payee wallet's key).
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Only resources whose name contains this (empty = all)"
+        required: false
+        default: ""
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Pay each paid resource once
+        env:
+          PAYER_PRIVATE_KEY: ${{ secrets.PAYER_PRIVATE_KEY }}
+          ONLY: ${{ inputs.only }}
+        run: |
+          if [ -n "$ONLY" ]; then npm run bazaar:list -- --pay --only "$ONLY"; else npm run bazaar:list -- --pay; fi

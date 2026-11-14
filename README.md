@@ -155,7 +155,7 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [x] RPC access from production (2026-11-14): free summary live with PublicNode fallback and stale cache; paid routes 503 until a payee is set; `llms.txt`, MCP card, OpenAPI live
 - [x] CPU time in production (2026-11-14): median 1.27 ms over 53 invocations, 0 errors (free plan limit 10 ms)
 - [x] Payee wallet (shared with agent-data-platform), own CDP Secret API key (no account permissions), Base mainnet (2026-11-14)
-- [ ] `server.json` and MCP Registry listing (workflow is ready; it runs when `server.json` is added)
+- [x] `server.json` added (2026-11-14); `.github/workflows/publish-mcp.yml` publishes it to the MCP Registry as `io.github.zuo305/chain-data-agent` whenever it changes on `main` (bump `version` with every change, keep it in sync with `SERVICE.version`)
 
 ### Resolved (2026-11-14): paid routes answered 503 / 1101
 - Error 1101: the x402 middleware started the facilitator's `getSupported`
@@ -172,7 +172,8 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
   compiling schema" and skips local validation; the metadata is still sent.
 
 ### M1 — Find demand
-- [ ] List in the x402 Bazaar (one paid call per resource via `npm run bazaar:list -- --pay`), 402 Index and MCP directories
+- [ ] List in the x402 Bazaar: run the manual workflow **List in x402 Bazaar** (`.github/workflows/bazaar-list.yml`), which pays each of the 4 paid resources once ($0.006 in total) from the repository secret `PAYER_PRIVATE_KEY` (a dedicated wallet with a little USDC on Base). `npm run bazaar:list` without `--pay` checks the examples for free (all 4 ok on 2026-11-14)
+- [ ] 402 Index, agent-tools.cloud, MCP directories (Glama, Smithery, mcpservers.org, AllMCPs, PayAPI Market)
 - [ ] First paid call from an agent that is not a directory, verifier or probe
 - [ ] Decide after ~2 weeks of listings: keep, change or drop Solana validator stats
 

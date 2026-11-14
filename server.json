@@ -1,0 +1,14 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.zuo305/chain-data-agent",
+  "title": "Chain Data for Agents (x402)",
+  "description": "Live Solana validator stats: stake, commission, vote credits, skip rate. Pay per call via x402.",
+  "version": "0.1.0",
+  "websiteUrl": "https://chain-data-agent.wangzuo305.workers.dev/",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://chain-data-agent.wangzuo305.workers.dev/mcp"
+    }
+  ]
+}
