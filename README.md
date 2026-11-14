@@ -152,7 +152,8 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [x] New Cloudflare account (free) and D1 database `chain-data-agent` (Eastern North America, 2026-11-14)
 - [x] Workers Builds connected to `main`; first deploy 2026-11-14
 - [x] Real `BASE_URL` in `src/service.ts`: https://chain-data-agent.wangzuo305.workers.dev
-- [ ] Check RPC access and CPU time per request in production
+- [x] RPC access from production (2026-11-14): free summary live with PublicNode fallback and stale cache; paid routes 503 until a payee is set; `llms.txt`, MCP card, OpenAPI live
+- [ ] Check CPU time per request in production (dashboard Metrics)
 - [ ] Payee wallet, CDP API key, Base mainnet
 - [ ] `server.json` and MCP Registry listing (workflow is ready; it runs when `server.json` is added)
 
