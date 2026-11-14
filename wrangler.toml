@@ -26,6 +26,9 @@ X402_FACILITATOR_URL = ""
 # Solana JSON-RPC endpoint. Empty = public mainnet-beta endpoint (rate limited).
 # An endpoint that embeds an API key must be a Secret instead, not a var.
 SOLANA_RPC_URL = ""
+# 402index.io domain verification hash (public), served at /.well-known/402index-verify.txt.
+# The claim token for editing listings is kept outside the repo.
+INDEX402_VERIFY_HASH = "a3663ce1ff6c448385c7ff9603710c2b8195653685fa44e2026aee640c5a7727"
 
 [triggers]
 # Daily pruning of free MCP call counters. Free plan: max 5 cron triggers per account.
