@@ -157,6 +157,25 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [x] Payee wallet (shared with agent-data-platform), own CDP Secret API key (no account permissions), Base mainnet (2026-11-14)
 - [ ] `server.json` and MCP Registry listing (workflow is ready; it runs when `server.json` is added)
 
+### Open issue (2026-11-14): paid routes answer 503
+- Since payments were enabled, every unpaid call to a paid route answers
+  503 `payment_facilitator_unavailable` with detail `Internal Server Error`.
+  The free routes are fine.
+- Fixed on the way: the x402 middleware started the facilitator's
+  `getSupported` call when it was created, inside whichever request came
+  first (often a free one), and later requests awaited that promise after
+  Workers had cancelled its I/O (error 1101). Commit 879789d initializes the
+  resource server inside the paid request instead; 1101 is gone. Port this
+  to agent-data-platform once verified.
+- Still open: initialization now succeeds, but `processHTTPRequest` in
+  `@x402/hono` throws (logged with `console.error`, answered as
+  "Internal Server Error"). The same flow returns 402 locally against a
+  simulated mainnet facilitator, so the difference is the real CDP
+  facilitator or this project's CDP key. Next step: read the error in
+  Workers Observability / `wrangler tail` with the read-only
+  `CLOUDFLARE_API_TOKEN` (Account Analytics, Workers Observability, Workers
+  Tail, Workers Scripts and D1, all Read; expires 2027-02-12).
+
 ### M1 — Find demand
 - [ ] List in the x402 Bazaar (one paid call per resource via `npm run bazaar:list -- --pay`), 402 Index and MCP directories
 - [ ] First paid call from an agent that is not a directory, verifier or probe
