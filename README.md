@@ -155,7 +155,7 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [x] RPC access from production (2026-11-14): free summary live with PublicNode fallback and stale cache; paid routes 503 until a payee is set; `llms.txt`, MCP card, OpenAPI live
 - [x] CPU time in production (2026-11-14): median 1.27 ms over 53 invocations, 0 errors (free plan limit 10 ms)
 - [x] Payee wallet (shared with agent-data-platform), own CDP Secret API key (no account permissions), Base mainnet (2026-11-14)
-- [x] `server.json` added (2026-11-14); `.github/workflows/publish-mcp.yml` publishes it to the MCP Registry as `io.github.zuo305/chain-data-agent` whenever it changes on `main` (bump `version` with every change, keep it in sync with `SERVICE.version`)
+- [x] `server.json` added (2026-11-14); `.github/workflows/publish-mcp.yml` published it to the MCP Registry as `io.github.zuo305/chain-data-agent` 0.1.0 (live 2026-11-14), and does so again whenever it changes on `main` (bump `version` with every change, keep it in sync with `SERVICE.version`)
 
 ### Resolved (2026-11-14): paid routes answered 503 / 1101
 - Error 1101: the x402 middleware started the facilitator's `getSupported`
