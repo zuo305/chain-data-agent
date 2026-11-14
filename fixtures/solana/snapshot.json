@@ -1,0 +1,1199 @@
+{
+ "epochInfo": {
+  "absoluteSlot": 469241436,
+  "blockHeight": 447256535,
+  "epoch": 1086,
+  "slotIndex": 89436,
+  "slotsInEpoch": 432000,
+  "transactionCount": 566628077284
+ },
+ "voteAccounts": {
+  "current": [
+   {
+    "activatedStake": 16955905044452598,
+    "commission": 0,
+    "epochCredits": [
+     [
+      1082,
+      45024285502362,
+      42597689451908
+     ],
+     [
+      1083,
+      47428550938451,
+      45024285502362
+     ],
+     [
+      1084,
+      49845577123092,
+      47428550938451
+     ],
+     [
+      1085,
+      52259169998952,
+      49845577123092
+     ],
+     [
+      1086,
+      52763253702887,
+      52259169998952
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 0,
+    "lastVote": 469241432,
+    "nodePubkey": "HEL1USMZKAL2odpNBj2oCjffnFGaYwmbGmyewGv1e2TU",
+    "rootSlot": 469241432,
+    "votePubkey": "he1iusunGwqrNtafDtLdhsUQDFvo13z9sUa36PauBtk"
+   },
+   {
+    "activatedStake": 16374908875718779,
+    "commission": 7,
+    "epochCredits": [
+     [
+      1082,
+      46349546893682,
+      43945256123272
+     ],
+     [
+      1083,
+      48773443299336,
+      46349546893682
+     ],
+     [
+      1084,
+      51130102130758,
+      48773443299336
+     ],
+     [
+      1085,
+      53461194238521,
+      51130102130758
+     ],
+     [
+      1086,
+      53943157245113,
+      53461194238521
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 700,
+    "lastVote": 469241432,
+    "nodePubkey": "Fd7btgySsrjuo25CJCj7oE7VPMyezDhnx7pZkj2v69Nk",
+    "rootSlot": 469241432,
+    "votePubkey": "CcaHc2L43ZWjwCHART3oZoJvHLAe9hzT2DJNUpBzoTN1"
+   },
+   {
+    "activatedStake": 12611498267898021,
+    "commission": 0,
+    "epochCredits": [
+     [
+      1082,
+      34768929807572,
+      32930055706035
+     ],
+     [
+      1083,
+      36609614030031,
+      34768929807572
+     ],
+     [
+      1084,
+      38494402790709,
+      36609614030031
+     ],
+     [
+      1085,
+      40351520570297,
+      38494402790709
+     ],
+     [
+      1086,
+      40746205825663,
+      40351520570297
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 0,
+    "lastVote": 469241432,
+    "nodePubkey": "DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy",
+    "rootSlot": 469241432,
+    "votePubkey": "3N7s9zXMZ4QqvHQR15t5GNHyqc89KduzMP7423eWiD5g"
+   },
+   {
+    "activatedStake": 10140468474556843,
+    "commission": 0,
+    "epochCredits": [
+     [
+      1082,
+      28969768554399,
+      27490026805064
+     ],
+     [
+      1083,
+      30452864133202,
+      28969768554399
+     ],
+     [
+      1084,
+      31903457061932,
+      30452864133202
+     ],
+     [
+      1085,
+      33339821676136,
+      31903457061932
+     ],
+     [
+      1086,
+      33633087971573,
+      33339821676136
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 0,
+    "lastVote": 469241432,
+    "nodePubkey": "E1r4Psq84tHfQ6aPTvvDka4U3u8zPVD7gEUrH25RdxHL",
+    "rootSlot": 469241432,
+    "votePubkey": "8GbwASqdpw4dVcwbWUxbHXMrjyQx2aKkoBR5H1GJF8iD"
+   },
+   {
+    "activatedStake": 9736889594396481,
+    "commission": 10,
+    "epochCredits": [
+     [
+      1082,
+      25807757547374,
+      24462253848018
+     ],
+     [
+      1083,
+      27171405822199,
+      25807757547374
+     ],
+     [
+      1084,
+      28564544398216,
+      27171405822199
+     ],
+     [
+      1085,
+      29934129862739,
+      28564544398216
+     ],
+     [
+      1086,
+      30229334083388,
+      29934129862739
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 1000,
+    "lastVote": 469241432,
+    "nodePubkey": "7jtWrBuj9k2E5RnoHGWSBosBwqwjZMvEnhe9qGLJdhT4",
+    "rootSlot": 469241432,
+    "votePubkey": "51JBzSTU5rAM8gLAVQKgp4WoZerQcSqWC7BitBzgUNAm"
+   },
+   {
+    "activatedStake": 9574439094659357,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1082,
+      26239790162179,
+      24889160968309
+     ],
+     [
+      1083,
+      27589550277475,
+      26239790162179
+     ],
+     [
+      1084,
+      28972563586210,
+      27589550277475
+     ],
+     [
+      1085,
+      30369560497192,
+      28972563586210
+     ],
+     [
+      1086,
+      30649934897393,
+      30369560497192
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 469241432,
+    "nodePubkey": "JUPiTERkf97eKN222JwY7bkpWuJnwqKtT44fsbJfhkr",
+    "rootSlot": 469241432,
+    "votePubkey": "CatzoSMUkTRidT5DwBxAC2pEtnwMBTpkCepHkFgZDiqb"
+   },
+   {
+    "activatedStake": 9199377378009499,
+    "commission": 7,
+    "epochCredits": [
+     [
+      1082,
+      25210305637854,
+      23914348371191
+     ],
+     [
+      1083,
+      26526576520496,
+      25210305637854
+     ],
+     [
+      1084,
+      27840434847359,
+      26526576520496
+     ],
+     [
+      1085,
+      29147985603477,
+      27840434847359
+     ],
+     [
+      1086,
+      29424766202043,
+      29147985603477
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 700,
+    "lastVote": 469241432,
+    "nodePubkey": "C8Bey3LKVJHVqN6xPTeW8WJfUgFQAeGNBpT4Rp99JP1k",
+    "rootSlot": 469241432,
+    "votePubkey": "26pV97Ce83ZQ6Kz9XT4td8tdoUFPTng8Fb8gPyc53dJx"
+   },
+   {
+    "activatedStake": 7914792045227849,
+    "commission": 7,
+    "epochCredits": [
+     [
+      1082,
+      21255336950755,
+      20146952663664
+     ],
+     [
+      1083,
+      22354321542112,
+      21255336950755
+     ],
+     [
+      1084,
+      23484733567111,
+      22354321542112
+     ],
+     [
+      1085,
+      24600738011314,
+      23484733567111
+     ],
+     [
+      1086,
+      24841531939625,
+      24600738011314
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 700,
+    "lastVote": 469241432,
+    "nodePubkey": "EvnRmnMrd69kFdbLMxWkTn1icZ7DCceRhvmb2SJXqDo4",
+    "rootSlot": 469241432,
+    "votePubkey": "9QU2QSxhb24FUX3Tu2FpczXjpK3VYrvRudywSZaM29mF"
+   },
+   {
+    "activatedStake": 6990062035194802,
+    "commission": 0,
+    "epochCredits": [
+     [
+      1082,
+      18961359481676,
+      17967345089291
+     ],
+     [
+      1083,
+      19949703345536,
+      18961359481676
+     ],
+     [
+      1084,
+      20932957720525,
+      19949703345536
+     ],
+     [
+      1085,
+      21943219627395,
+      20932957720525
+     ],
+     [
+      1086,
+      22152330557486,
+      21943219627395
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 0,
+    "lastVote": 469241432,
+    "nodePubkey": "Awes4Tr6TX8JDzEhCZY2QVNimT6iD1zWHzf1vNyGvpLM",
+    "rootSlot": 469241432,
+    "votePubkey": "DumiCKHVqoCQKD8roLApzR5Fit8qGV5fVQsJV9sTZk4a"
+   },
+   {
+    "activatedStake": 6707744900630347,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1082,
+      18809276938234,
+      17844557313855
+     ],
+     [
+      1083,
+      19756509926378,
+      18809276938234
+     ],
+     [
+      1084,
+      20723713027523,
+      19756509926378
+     ],
+     [
+      1085,
+      21698105682430,
+      20723713027523
+     ],
+     [
+      1086,
+      21902517717807,
+      21698105682430
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 469241432,
+    "nodePubkey": "9eGrDohdNTAo61DRHyfMuqKWXqYnA3i254Wiszxe8FoY",
+    "rootSlot": 469241432,
+    "votePubkey": "CvSb7wdQAFpHuSpTYTJnX5SYH4hCfQ9VuGnqrKaKwycB"
+   },
+   {
+    "activatedStake": 6123639029856046,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1082,
+      16396910645854,
+      15541012504306
+     ],
+     [
+      1083,
+      17249985796252,
+      16396910645854
+     ],
+     [
+      1084,
+      18091089749119,
+      17249985796252
+     ],
+     [
+      1085,
+      18971824250574,
+      18091089749119
+     ],
+     [
+      1086,
+      19160327093952,
+      18971824250574
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 469241432,
+    "nodePubkey": "5pPRHniefFjkiaArbGX3Y8NUysJmQ9tMZg3FrFGwHzSm",
+    "rootSlot": 469241432,
+    "votePubkey": "DdCNGDpP7qMgoAy6paFzhhak2EeyCZcgjH7ak5u5v28m"
+   },
+   {
+    "activatedStake": 5805210144729940,
+    "commission": 10,
+    "epochCredits": [
+     [
+      1082,
+      15417773601607,
+      14601849368495
+     ],
+     [
+      1083,
+      16247273230556,
+      15417773601607
+     ],
+     [
+      1084,
+      17062802509913,
+      16247273230556
+     ],
+     [
+      1085,
+      17895605283244,
+      17062802509913
+     ],
+     [
+      1086,
+      18067686622158,
+      17895605283244
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 1000,
+    "lastVote": 469241425,
+    "nodePubkey": "5Cchr1XGEg7dbBXByV5NY2ad8jfxAM7HA3x8D56rq9Ux",
+    "rootSlot": 469241374,
+    "votePubkey": "GHViLgbrJdZDPb6sphRbeuPNM9cmjsFuGWzrTF1sKF5n"
+   },
+   {
+    "activatedStake": 5352685204876981,
+    "commission": 7,
+    "epochCredits": [
+     [
+      1082,
+      13569726370851,
+      12798460603245
+     ],
+     [
+      1083,
+      14334854825112,
+      13569726370851
+     ],
+     [
+      1084,
+      15122036878951,
+      14334854825112
+     ],
+     [
+      1085,
+      15894290825828,
+      15122036878951
+     ],
+     [
+      1086,
+      16053429508001,
+      15894290825828
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 700,
+    "lastVote": 469241432,
+    "nodePubkey": "GnC339vkyXRm1jRX69dt9mapPPu2LbzXfSDoxc91qta6",
+    "rootSlot": 469241432,
+    "votePubkey": "FKsC411dik9ktS6xPADxs4Fk2SCENvAiuccQHLAPndvk"
+   },
+   {
+    "activatedStake": 4831256468894619,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1082,
+      12303728877730,
+      11622935777259
+     ],
+     [
+      1083,
+      12954265843562,
+      12303728877730
+     ],
+     [
+      1084,
+      13666544355321,
+      12954265843562
+     ],
+     [
+      1085,
+      14401062938288,
+      13666544355321
+     ],
+     [
+      1086,
+      14544931950073,
+      14401062938288
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 469241425,
+    "nodePubkey": "Fc6NNdS2j3EmrWbU6Uqt6wsKB5ef72NjaWfNxKYbULGD",
+    "rootSlot": 469241405,
+    "votePubkey": "2tucttroqFNXsrYeMBQ8LfzKNfgwT2rHBzAF6RzbbHEp"
+   },
+   {
+    "activatedStake": 4683837243145874,
+    "commission": 8,
+    "epochCredits": [
+     [
+      1082,
+      12869606243653,
+      12176995048750
+     ],
+     [
+      1083,
+      13535462776385,
+      12869606243653
+     ],
+     [
+      1084,
+      14209612050040,
+      13535462776385
+     ],
+     [
+      1085,
+      14863524312321,
+      14209612050040
+     ],
+     [
+      1086,
+      14996023048961,
+      14863524312321
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 800,
+    "lastVote": 469241425,
+    "nodePubkey": "9rkJMARqK6VBkcxGfKBAwnA44gPAfGxPbPsfsggFNDSQ",
+    "rootSlot": 469241374,
+    "votePubkey": "HimWQUK61d9wxhw7EYu9jUje7xQiDs4jKexaTSvuCmXE"
+   },
+   {
+    "activatedStake": 4516398019911655,
+    "commission": 0,
+    "epochCredits": [
+     [
+      1082,
+      17300450449193,
+      16397964728120
+     ],
+     [
+      1083,
+      18211971888397,
+      17300450449193
+     ],
+     [
+      1084,
+      19100322881274,
+      18211971888397
+     ],
+     [
+      1085,
+      19980277496486,
+      19100322881274
+     ],
+     [
+      1086,
+      20143251521402,
+      19980277496486
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 0,
+    "lastVote": 469241432,
+    "nodePubkey": "JD549HsbJHeEKKUrKgg4Fj2iyv2RGjsV7NTZjZUrHybB",
+    "rootSlot": 469241432,
+    "votePubkey": "3JD3jMmnR6g88qff2WZ3cMHJRjJMUk9yVZtmYTYeFrXf"
+   },
+   {
+    "activatedStake": 4477329987787841,
+    "commission": 100,
+    "epochCredits": [
+     [
+      1082,
+      12226057416846,
+      11593561344103
+     ],
+     [
+      1083,
+      12875999797569,
+      12226057416846
+     ],
+     [
+      1084,
+      13518630870372,
+      12875999797569
+     ],
+     [
+      1085,
+      14161896943524,
+      13518630870372
+     ],
+     [
+      1086,
+      14304932251858,
+      14161896943524
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 10000,
+    "lastVote": 469241432,
+    "nodePubkey": "9jxgosAfHgHzwnxsHw4RAZYaLVokMbnYtmiZBreynGFP",
+    "rootSlot": 469241432,
+    "votePubkey": "HZKopZYvv8v6un2H6KUNVQCnK5zM9emKKezvqhTBSpEc"
+   },
+   {
+    "activatedStake": 4094900707817395,
+    "commission": 100,
+    "epochCredits": [
+     [
+      1082,
+      11212122490712,
+      10607898517376
+     ],
+     [
+      1083,
+      11792039132645,
+      11212122490712
+     ],
+     [
+      1084,
+      12376736231053,
+      11792039132645
+     ],
+     [
+      1085,
+      12940185369996,
+      12376736231053
+     ],
+     [
+      1086,
+      13059528450661,
+      12940185369996
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 10000,
+    "lastVote": 469241432,
+    "nodePubkey": "EkvdKhULbMFqjKBKotAzGi3kwMvMpYNDKJXXQQmi6C1f",
+    "rootSlot": 469241432,
+    "votePubkey": "3ZYJxzCeweSoh2Jj7oCgencFs9y27iKmXJeqYapje1cj"
+   },
+   {
+    "activatedStake": 4035615521229866,
+    "commission": 100,
+    "epochCredits": [
+     [
+      1082,
+      11073453355870,
+      10498131877444
+     ],
+     [
+      1083,
+      11656366127862,
+      11073453355870
+     ],
+     [
+      1084,
+      12224065838305,
+      11656366127862
+     ],
+     [
+      1085,
+      12796122469124,
+      12224065838305
+     ],
+     [
+      1086,
+      12913140424211,
+      12796122469124
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 10000,
+    "lastVote": 469241432,
+    "nodePubkey": "FBKFWadXZJahGtFitAsBvbqh5968gLY7dMBBJUoUjeNi",
+    "rootSlot": 469241432,
+    "votePubkey": "AZoCYB4VgoM9DR9f1ZFcBn8xPSbtbqoxZnKJR7tkvEoX"
+   },
+   {
+    "activatedStake": 4031000587362495,
+    "commission": 100,
+    "epochCredits": [
+     [
+      1082,
+      11009213748307,
+      10443601474727
+     ],
+     [
+      1083,
+      11587800128070,
+      11009213748307
+     ],
+     [
+      1084,
+      12163412727055,
+      11587800128070
+     ],
+     [
+      1085,
+      12741804923103,
+      12163412727055
+     ],
+     [
+      1086,
+      12859210296606,
+      12741804923103
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 10000,
+    "lastVote": 469241432,
+    "nodePubkey": "5ZqveVffQPiUbkjBg4KD9kib1MKHLqiFno4ke9jSq9qk",
+    "rootSlot": 469241432,
+    "votePubkey": "EcEowA4GKDsdVBF9PNAZa6c9M4WgYG8y4GnpZSUaqioS"
+   },
+   {
+    "activatedStake": 189456445879755,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1082,
+      512141196178,
+      483673347039
+     ],
+     [
+      1083,
+      539258565821,
+      512141196178
+     ],
+     [
+      1084,
+      568145806937,
+      539258565821
+     ],
+     [
+      1085,
+      596775483533,
+      568145806937
+     ],
+     [
+      1086,
+      604183246884,
+      596775483533
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 469241432,
+    "nodePubkey": "1KXvrkPXwkGF6NK1zyzVuJqbXfpenPVPP6hoiK9bsK3",
+    "rootSlot": 469241432,
+    "votePubkey": "1KXz4xKV2viJCGpxqnQqdf2J45vQr5USdmtcJLTaHkm"
+   },
+   {
+    "activatedStake": 189379172887087,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1082,
+      271420319318,
+      244942845591
+     ],
+     [
+      1083,
+      295251925344,
+      271420319318
+     ],
+     [
+      1084,
+      323451195102,
+      295251925344
+     ],
+     [
+      1085,
+      348224174039,
+      323451195102
+     ],
+     [
+      1086,
+      353337871782,
+      348224174039
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 469241431,
+    "nodePubkey": "BCeczqpTRPigndHVJu1KEzno1Uhb4hjrE7ttmAndrV1p",
+    "rootSlot": 469241431,
+    "votePubkey": "FdGcvmbpebUwYA3vSywnagsaC3Tq3pAVmcR6VoxVcdV9"
+   },
+   {
+    "activatedStake": 188824438051274,
+    "commission": 2,
+    "epochCredits": [
+     [
+      1082,
+      534104856038,
+      505979925715
+     ],
+     [
+      1083,
+      563615999221,
+      534104856038
+     ],
+     [
+      1084,
+      591777525673,
+      563615999221
+     ],
+     [
+      1085,
+      619018437052,
+      591777525673
+     ],
+     [
+      1086,
+      624411915286,
+      619018437052
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 200,
+    "lastVote": 469241432,
+    "nodePubkey": "9KiUwrsjWVN9CuNexoGZvjgGfGjCRu9SUzPeKZ2GRFye",
+    "rootSlot": 469241432,
+    "votePubkey": "edu1fZt5i82cFm6ujUoyXLMdujWxZyWYC8fkydWHRNT"
+   },
+   {
+    "activatedStake": 188650021327573,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1082,
+      545568049447,
+      520468758999
+     ],
+     [
+      1083,
+      575040295141,
+      545568049447
+     ],
+     [
+      1084,
+      602283514116,
+      575040295141
+     ],
+     [
+      1085,
+      633581661353,
+      602283514116
+     ],
+     [
+      1086,
+      638922055542,
+      633581661353
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 469241432,
+    "nodePubkey": "5marvipGzf98hxnoJFXsZbGHSXcEQ3yRGJ4ps7D3V4ou",
+    "rootSlot": 469241432,
+    "votePubkey": "i6PZjkPHGYmPfPE8LsJuLn5huZyusXhmysiDiHGPjxb"
+   },
+   {
+    "activatedStake": 187027358447009,
+    "commission": 0,
+    "epochCredits": [
+     [
+      1082,
+      602016657063,
+      573283776885
+     ],
+     [
+      1083,
+      627110366919,
+      602016657063
+     ],
+     [
+      1084,
+      650514398741,
+      627110366919
+     ],
+     [
+      1085,
+      676535174014,
+      650514398741
+     ],
+     [
+      1086,
+      682763371335,
+      676535174014
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 0,
+    "lastVote": 469241432,
+    "nodePubkey": "3WDh9HgusCujDmXCVhophLrHvoKHQd1Sd4uFHz1Awo35",
+    "rootSlot": 469241432,
+    "votePubkey": "9G19HT8xqceG7mKQVSrTRS3DGnGqDHErPyQEaEfyWEuW"
+   },
+   {
+    "activatedStake": 2025192400,
+    "commission": 6,
+    "epochCredits": [],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 600,
+    "lastVote": 469241432,
+    "nodePubkey": "e1STgSzsMaxT2zuhvNqrL8BgNTpDfhLy7wShAZeN219",
+    "rootSlot": 469241432,
+    "votePubkey": "25yzQawc1qeAupemd5KLPSotLejVHLcpk7DGo4ityL86"
+   },
+   {
+    "activatedStake": 2001767621,
+    "commission": 0,
+    "epochCredits": [
+     [
+      1060,
+      48114075,
+      41204686
+     ],
+     [
+      1061,
+      55025276,
+      48114075
+     ],
+     [
+      1062,
+      61934337,
+      55025276
+     ],
+     [
+      1063,
+      68835098,
+      61934337
+     ],
+     [
+      1064,
+      68914154,
+      68835098
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 0,
+    "lastVote": 469241432,
+    "nodePubkey": "EdfKqTQBwHH4fnLQx2ewkkH2mGJR8tiYbjBd2GufKeWg",
+    "rootSlot": 469241432,
+    "votePubkey": "7pnDh3TaUHg21FMM5c9bzkhc8jiPpD3u1i2RwU1qmrWn"
+   },
+   {
+    "activatedStake": 1497717120,
+    "commission": 100,
+    "epochCredits": [
+     [
+      1060,
+      836504213,
+      829716512
+     ],
+     [
+      1061,
+      843415285,
+      836504213
+     ],
+     [
+      1062,
+      850300818,
+      843415285
+     ],
+     [
+      1063,
+      857177754,
+      850300818
+     ],
+     [
+      1064,
+      857256810,
+      857177754
+     ]
+    ],
+    "epochVoteAccount": true,
+    "inflationRewardsCommissionBps": 10000,
+    "lastVote": 469241432,
+    "nodePubkey": "FhFB8MAj5Kzxo2aUKnnAXGWxQRhfe1Nfrf5gTReQ1evD",
+    "rootSlot": 469241432,
+    "votePubkey": "GdFaSCpPf9RqRjxkvXUCzLR62bEjmEPZMS9XRVFC3pDu"
+   }
+  ],
+  "delinquent": [
+   {
+    "activatedStake": 42511353226685,
+    "commission": 5,
+    "epochCredits": [
+     [
+      1077,
+      193704200891,
+      177592718411
+     ],
+     [
+      1078,
+      211821897568,
+      193704200891
+     ],
+     [
+      1079,
+      226430346069,
+      211821897568
+     ],
+     [
+      1080,
+      239248475414,
+      226430346069
+     ],
+     [
+      1081,
+      252113872488,
+      239248475414
+     ]
+    ],
+    "epochVoteAccount": false,
+    "inflationRewardsCommissionBps": 500,
+    "lastVote": 467356334,
+    "nodePubkey": "pitch9cMruwjDtAnisNS4mwZUPhMsBztNEGu2weMg55",
+    "rootSlot": 467356334,
+    "votePubkey": "P1TCHYwYPsNaNUK6fGkZzwXPjnYAMYRnUUv4c1TREee"
+   },
+   {
+    "activatedStake": 10634399387823,
+    "commission": 3,
+    "epochCredits": [],
+    "epochVoteAccount": false,
+    "inflationRewardsCommissionBps": 300,
+    "lastVote": 0,
+    "nodePubkey": "H4TCC7HNnsSV7G4KFkcWrdkTd5434eEqiQxrVSHgt7AE",
+    "rootSlot": 0,
+    "votePubkey": "6M6vB2thgACsfHHuk5KZPdWqSJivm9mArVLxKXynBGbS"
+   },
+   {
+    "activatedStake": 1998333760,
+    "commission": 100,
+    "epochCredits": [],
+    "epochVoteAccount": false,
+    "inflationRewardsCommissionBps": 10000,
+    "lastVote": 0,
+    "nodePubkey": "FdPyYztZ3DoKAiXxQKXzrbAXHH81kw6JWfG3JyiJy35E",
+    "rootSlot": 0,
+    "votePubkey": "F3Bv6jaD8dAK8UwTshyKbji58fUDWUP36oee8hu53pRP"
+   }
+  ]
+ },
+ "blockProduction": {
+  "context": {
+   "apiVersion": "4.4.0",
+   "slot": 469241434
+  },
+  "value": {
+   "byIdentity": {
+    "1KXvrkPXwkGF6NK1zyzVuJqbXfpenPVPP6hoiK9bsK3": [
+     64,
+     64
+    ],
+    "3WDh9HgusCujDmXCVhophLrHvoKHQd1Sd4uFHz1Awo35": [
+     48,
+     48
+    ],
+    "5Cchr1XGEg7dbBXByV5NY2ad8jfxAM7HA3x8D56rq9Ux": [
+     1196,
+     1196
+    ],
+    "5ZqveVffQPiUbkjBg4KD9kib1MKHLqiFno4ke9jSq9qk": [
+     804,
+     804
+    ],
+    "5marvipGzf98hxnoJFXsZbGHSXcEQ3yRGJ4ps7D3V4ou": [
+     32,
+     32
+    ],
+    "5pPRHniefFjkiaArbGX3Y8NUysJmQ9tMZg3FrFGwHzSm": [
+     1360,
+     1360
+    ],
+    "7jtWrBuj9k2E5RnoHGWSBosBwqwjZMvEnhe9qGLJdhT4": [
+     2136,
+     2136
+    ],
+    "9KiUwrsjWVN9CuNexoGZvjgGfGjCRu9SUzPeKZ2GRFye": [
+     36,
+     36
+    ],
+    "9eGrDohdNTAo61DRHyfMuqKWXqYnA3i254Wiszxe8FoY": [
+     1456,
+     1456
+    ],
+    "9jxgosAfHgHzwnxsHw4RAZYaLVokMbnYtmiZBreynGFP": [
+     1064,
+     1064
+    ],
+    "9rkJMARqK6VBkcxGfKBAwnA44gPAfGxPbPsfsggFNDSQ": [
+     876,
+     876
+    ],
+    "Awes4Tr6TX8JDzEhCZY2QVNimT6iD1zWHzf1vNyGvpLM": [
+     1464,
+     1464
+    ],
+    "BCeczqpTRPigndHVJu1KEzno1Uhb4hjrE7ttmAndrV1p": [
+     32,
+     32
+    ],
+    "C8Bey3LKVJHVqN6xPTeW8WJfUgFQAeGNBpT4Rp99JP1k": [
+     1940,
+     1940
+    ],
+    "DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy": [
+     2812,
+     2808
+    ],
+    "E1r4Psq84tHfQ6aPTvvDka4U3u8zPVD7gEUrH25RdxHL": [
+     1988,
+     1988
+    ],
+    "EkvdKhULbMFqjKBKotAzGi3kwMvMpYNDKJXXQQmi6C1f": [
+     820,
+     820
+    ],
+    "EvnRmnMrd69kFdbLMxWkTn1icZ7DCceRhvmb2SJXqDo4": [
+     1724,
+     1724
+    ],
+    "FBKFWadXZJahGtFitAsBvbqh5968gLY7dMBBJUoUjeNi": [
+     796,
+     796
+    ],
+    "Fc6NNdS2j3EmrWbU6Uqt6wsKB5ef72NjaWfNxKYbULGD": [
+     980,
+     979
+    ],
+    "Fd7btgySsrjuo25CJCj7oE7VPMyezDhnx7pZkj2v69Nk": [
+     3368,
+     3368
+    ],
+    "GnC339vkyXRm1jRX69dt9mapPPu2LbzXfSDoxc91qta6": [
+     1088,
+     1088
+    ],
+    "HEL1USMZKAL2odpNBj2oCjffnFGaYwmbGmyewGv1e2TU": [
+     3536,
+     3536
+    ],
+    "JD549HsbJHeEKKUrKgg4Fj2iyv2RGjsV7NTZjZUrHybB": [
+     1128,
+     1128
+    ],
+    "JUPiTERkf97eKN222JwY7bkpWuJnwqKtT44fsbJfhkr": [
+     1920,
+     1920
+    ]
+   },
+   "range": {
+    "firstSlot": 469152000,
+    "lastSlot": 469241434
+   }
+  }
+ }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "chain-data-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "build:check": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "x402:pay": "tsx scripts/x402-pay.ts",
+    "x402:mcp-pay": "tsx scripts/x402-mcp-pay.ts",
+    "bazaar:list": "tsx scripts/bazaar-list.ts"
+  },
+  "dependencies": {
+    "@coinbase/x402": "^2.1.0",
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "@x402/core": "^2.28.0",
+    "@x402/evm": "^2.28.0",
+    "@x402/extensions": "^2.28.0",
+    "@x402/hono": "^2.28.0",
+    "@x402/mcp": "^2.28.0",
+    "hono": "^4.13.12",
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.25.2"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "^12.1.0",
+    "@cloudflare/workers-types": "^5.20260925.1",
+    "@types/node": "^22.0.0",
+    "@x402/fetch": "^2.28.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "viem": "^2.57.2",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.0.0"
+  }
+}

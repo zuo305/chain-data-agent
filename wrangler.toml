@@ -1,0 +1,31 @@
+name = "chain-data-agent"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+# Platform tables (usage log, API keys, free MCP calls, data requests).
+# TODO: create "chain-data-agent" in the Cloudflare dashboard (D1) and paste its id.
+[[d1_databases]]
+binding = "DB"
+database_name = "chain-data-agent"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[vars]
+# Wallet that receives x402 payments. Paid endpoints return 503 while empty.
+X402_PAY_TO = ""
+# CAIP-2 network id: eip155:84532 = Base Sepolia (testnet), eip155:8453 = Base mainnet
+X402_NETWORK = "eip155:84532"
+# Empty: use the CDP facilitator when CDP_API_KEY_ID / CDP_API_KEY_SECRET secrets
+# are set (required for x402 Bazaar listing), else https://x402.org/facilitator.
+X402_FACILITATOR_URL = ""
+# Solana JSON-RPC endpoint. Empty = public mainnet-beta endpoint (rate limited).
+# An endpoint that embeds an API key must be a Secret instead, not a var.
+SOLANA_RPC_URL = ""
+
+[triggers]
+# Daily pruning of free MCP call counters. Free plan: max 5 cron triggers per account.
+crons = ["17 3 * * *"]

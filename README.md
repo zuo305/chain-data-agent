@@ -1,0 +1,156 @@
+# Chain Data Agent
+
+On-chain data sold to AI agents. Agents discover the service through
+`llms.txt`, an MCP server and a JSON catalog, and pay per call with
+[x402](https://x402.org) (USDC on Base, no signup, no API key).
+
+This is an experiment to find which on-chain data agents actually pay for.
+It reuses the dataset-agnostic platform of
+[agent-data-platform](https://github.com/zuo305/agent-data-platform), whose
+first month showed that discovery works but demand needs a better fit: its
+callers are crypto-native agents, and NSW planning data was not what they
+needed.
+
+**Datasets:** Solana validator stats (live).
+
+## Principles
+
+- **Find demand cheaply.** Each experiment is a few endpoints computed live
+  from public chain state; nothing is stored until an endpoint has paying users.
+- **$0 to run.** Cloudflare Workers Free, D1 free tier, public RPC endpoints,
+  GitHub Actions on a public repository.
+- **Own the data path.** Use public chain state or sources whose terms permit
+  commercial redistribution; never resell aggregators that forbid it.
+- **Agents are first-class customers.** Machine-readable docs, predictable
+  JSON envelopes, clear prices, a free summary endpoint per dataset and a free
+  preview in every 402.
+- **Measure everything.** Caller type, tool, tier and failures are logged.
+
+## How it works
+
+```
+Agent ──GET /v1/solana-validators/validator?vote=…──▶ Worker
+      ◀──402 + PAYMENT-REQUIRED (+ free preview)───── (price, network, payTo)
+      ──GET + PAYMENT-SIGNATURE────────────────────▶ x402 middleware ──verify──▶ facilitator
+                                                     handler ──JSON-RPC──▶ Solana (cached 60 s)
+      ◀──200 { data, meta, attribution } + PAYMENT-RESPONSE (settled)
+```
+
+The platform (`src/platform/`) derives routing, x402 pricing, MCP tools,
+OpenAPI, `llms.txt`, well-known discovery files, the website and telemetry
+from each dataset's declaration. See agent-data-platform's README for the
+platform's design notes; the files are the same apart from `src/service.ts`.
+
+### Project structure
+
+```
+src/
+├── index.ts                  # App entry: middleware order, mounts datasets
+├── service.ts                # Service identity: name, description, base URL
+├── types.ts                  # Worker bindings and context variables
+├── platform/                 # Dataset-agnostic layer (from agent-data-platform)
+└── datasets/
+    ├── registry.ts           # The list of live datasets
+    └── solana-validators/    # Live Solana network and validator stats
+        ├── rpc.ts            # JSON-RPC client with a 60 s Workers cache
+        ├── stats.ts          # Pure computations over one chain snapshot
+        ├── examples.ts       # Output examples for Bazaar and docs
+        └── index.ts          # Endpoints, prices, prompts
+migrations/                   # D1 schema (platform tables only)
+fixtures/solana/              # Trimmed real mainnet-beta snapshot for tests
+scripts/                      # x402 payment and Bazaar listing tools
+test/                         # Vitest unit tests
+```
+
+## Solana validator stats (v1)
+
+| Endpoint | MCP tool | Price | Description |
+|---|---|---|---|
+| `GET /v1/solana-validators/summary` | `solana_validators_get_network_summary` | free | Epoch progress, validator counts, total and delinquent stake, Nakamoto coefficient, median commission, cluster skip rate, median vote credits per SOL |
+| `GET /v1/solana-validators/validator` | `solana_validators_get_validator` | $0.001 | One validator by `vote` or `identity`: stake, share and rank, commission, delinquency, slots behind tip, vote credits per SOL for the last 5 epochs vs the cluster median, current-epoch block production and skip rate |
+| `GET /v1/solana-validators/validators` | `solana_validators_list_validators` | $0.002 | Validators ranked by `stake`, `credits`, `skip_rate` or `commission`, filtered by `max_commission`, `min_stake_sol`, `include_delinquent`; up to 50 rows |
+
+Notes:
+- Data is computed on each call from `getVoteAccounts`, `getEpochInfo` and
+  `getBlockProduction` (mainnet-beta). RPC results are cached for 60 s in
+  the Workers cache, so values are at most a minute old.
+- Measured 2026-11-14: `getVoteAccounts` is ~315 KB for ~700 validators.
+  Parsing plus computing takes ~3 ms warm, 4–7 ms cold (free plan limit:
+  10 ms CPU per request).
+- Vote credits scale with stake on current Solana versions (~143k credits
+  per SOL per epoch in epoch 1085), so validators are compared by credits
+  per SOL relative to the cluster median (validators under 1,000 SOL are
+  left out of the median). This uses today's stake, so validators whose
+  stake changed recently look better or worse than they were.
+- The public RPC endpoint is rate limited per IP and not meant for
+  production. `SOLANA_RPC_URL` switches to another endpoint (a free-tier
+  provider key goes in a Secret, not in `wrangler.toml`).
+
+## Data sources
+
+| Source | Terms | Commercial use | Status |
+|---|---|---|---|
+| Solana mainnet-beta chain state (JSON-RPC) | Public blockchain data | Yes | Live as `solana-validators` |
+| DefiLlama unlocks / emissions | Site terms: personal, non-commercial use | **No** (without a licence) | Excluded |
+| beaconcha.in API | API terms forbid redistribution and commercial exploitation | **No** | Excluded |
+| Tokenomist, Messari, CryptoRank, Rated | Paid APIs, no resale | **No** | Excluded |
+
+## Deployment
+
+Deploys happen **only** through Cloudflare Workers Builds on push to `main`.
+Never run `wrangler deploy` from a dev session.
+
+One-time setup in the new Cloudflare account (free plan):
+
+1. D1 → create database `chain-data-agent`; put its id in `wrangler.toml`.
+2. Workers → connect the Git repository `zuo305/chain-data-agent`,
+   production branch `main`, build command empty, deploy command
+   `npm run deploy`. The build API token needs **D1 Edit**.
+3. Put the `workers.dev` URL in `src/service.ts` (`BASE_URL`).
+4. Before taking payments: set `X402_PAY_TO` (a new payee wallet) and the
+   CDP secrets `CDP_API_KEY_ID` / `CDP_API_KEY_SECRET`; switch
+   `X402_NETWORK` to `eip155:8453` for mainnet.
+
+Configuration (`wrangler.toml` `[vars]`, all public): `X402_PAY_TO`,
+`X402_NETWORK`, `X402_FACILITATOR_URL`, `SOLANA_RPC_URL`, and the optional
+listing vars documented in `src/types.ts`. Secrets: `CDP_API_KEY_ID`,
+`CDP_API_KEY_SECRET`, `ADMIN_TOKEN`, `CLIENT_ID_SECRET`.
+
+## Development (in a cloud session)
+
+```bash
+npm install
+npm run db:migrate:local      # apply migrations to local D1
+npm test                      # unit tests
+npm run typecheck
+npm run build:check           # bundle the Worker without deploying
+npm run dev                   # local Worker on :8787
+```
+
+```bash
+curl localhost:8787/llms.txt
+curl localhost:8787/v1/solana-validators/summary
+curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFbfg8zVMZHKQcMugD4tMR9u2da"  # 503 until X402_PAY_TO is set, then 402
+```
+
+## Milestones
+
+### M0 — Foundations
+- [x] Repository created (public, for free GitHub Actions)
+- [x] Platform copied from agent-data-platform; service identity in `src/service.ts`
+- [x] Consolidated platform migration (`0001_platform.sql`)
+- [x] First dataset: Solana validator stats, computed live (1 free, 2 paid endpoints)
+- [ ] New Cloudflare account (free): D1 database, Workers Builds connected to `main`
+- [ ] Real `BASE_URL` in `src/service.ts`; check CPU time per request in production
+- [ ] Payee wallet, CDP API key, Base mainnet
+- [ ] `server.json` and MCP Registry listing (workflow is ready; it runs when `server.json` is added)
+
+### M1 — Find demand
+- [ ] List in the x402 Bazaar (one paid call per resource via `npm run bazaar:list -- --pay`), 402 Index and MCP directories
+- [ ] First paid call from an agent that is not a directory, verifier or probe
+- [ ] Decide after ~2 weeks of listings: keep, change or drop Solana validator stats
+
+### M2 — Next experiments (each one only after a demand check)
+- [ ] Token unlocks from on-chain vesting contracts (Sablier, Hedgey, Streamflow): measure coverage of the 10–20 largest upcoming unlocks first; below ~50% the on-chain route does not work
+- [ ] Validator history (needs storage, e.g. a daily GitHub Actions snapshot) once the live endpoints have users
+- [ ] Ethereum validators: on hold (≈1M validators do not fit the free D1 tier; operator labels have licence issues)
