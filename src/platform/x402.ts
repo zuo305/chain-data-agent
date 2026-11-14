@@ -193,46 +193,62 @@ export async function withPreview(
 export const configKey = (config: X402Config) =>
   `${config.payTo}|${config.network}|${config.facilitator}|${config.cdpKey?.id ?? ""}|${config.builderCode ?? ""}`;
 
-// One resource server per isolate and configuration, shared by the HTTP
-// middleware and the MCP server.
-let serverCache: { key: string; server: x402ResourceServer; ready: Promise<void> | null } | null = null;
+// One initialized resource server per isolate and configuration, shared by
+// the HTTP middleware and the MCP server. It is initialized (the
+// facilitator's supported payment kinds loaded) inside the request that needs
+// it and cached only once ready: a Workers request cannot await I/O started
+// by another request, which may already have finished and had its I/O
+// cancelled (seen in production as error 1101 and "Internal Server Error").
+// Concurrent first requests each initialize their own server; the first one
+// ready is kept.
+let readyServer: { key: string; server: x402ResourceServer } | null = null;
 
-export function resourceServer(config: X402Config): x402ResourceServer {
-  const key = configKey(config);
-  if (!serverCache || serverCache.key !== key) {
-    const facilitator = new HTTPFacilitatorClient(facilitatorConfig(config));
-    const server = new x402ResourceServer(facilitator).register(
-      config.network as `${string}:${string}`,
-      new ExactEvmScheme()
-    );
-    server.registerExtension(bazaarResourceServerExtension);
-    server.registerExtension(builderCodeResourceServerExtension);
-    serverCache = { key, server, ready: null };
-  }
-  return serverCache.server;
-}
-
-// Resource server with the facilitator's supported kinds loaded; retried on
-// the next call if the facilitator was unreachable.
-export async function initializedResourceServer(config: X402Config): Promise<x402ResourceServer> {
-  const server = resourceServer(config);
-  const entry = serverCache!;
-  entry.ready ??= server.initialize().catch((err) => {
-    entry.ready = null;
-    throw err;
-  });
-  await entry.ready;
+function newResourceServer(config: X402Config): x402ResourceServer {
+  const facilitator = new HTTPFacilitatorClient(facilitatorConfig(config));
+  const server = new x402ResourceServer(facilitator).register(
+    config.network as `${string}:${string}`,
+    new ExactEvmScheme()
+  );
+  server.registerExtension(bazaarResourceServerExtension);
+  server.registerExtension(builderCodeResourceServerExtension);
   return server;
 }
 
-// The x402 middleware is built lazily on the first request, because Worker
-// env bindings are only available per request. It is cached per isolate and
-// rebuilt only if the configuration changes.
-let cached: { key: string; middleware: MiddlewareHandler } | null = null;
+export async function initializedResourceServer(config: X402Config): Promise<x402ResourceServer> {
+  const key = configKey(config);
+  if (readyServer?.key === key) return readyServer.server;
+  const server = newResourceServer(config);
+  await server.initialize();
+  if (readyServer?.key !== key) readyServer = { key, server };
+  return readyServer.server;
+}
+
+// The x402 middleware for the ready resource server. It is built with
+// syncFacilitatorOnStart = false: by default the library starts initializing
+// when the middleware is created and every later request awaits that shared
+// promise, which breaks across Workers requests (see above).
+let cached: { server: x402ResourceServer; middleware: MiddlewareHandler } | null = null;
 
 // Wait before retrying a request that failed in the x402 middleware before
 // reaching the handler (see x402Payments)
 export const FACILITATOR_RETRY_DELAY_MS = 500;
+
+// The facilitator is still unreachable after the retry; the next request
+// tries again. A 503 tells agents to retry rather than that the API is broken.
+function facilitatorUnavailable(c: Context<AppEnv>, paid: boolean, cause: unknown): Response {
+  const detail = errorDetail(cause);
+  c.set("logDetail", appendLogDetail(c.get("logDetail"), `[x402 error] ${paid ? "with payment" : "no payment"}: ${detail}`));
+  return c.json(
+    {
+      error: "payment_facilitator_unavailable",
+      message: "The x402 payment facilitator could not be reached. No payment was taken; retry in a few seconds.",
+      // Masked cause, no credentials
+      detail,
+    },
+    503,
+    { "Retry-After": "5" }
+  );
+}
 
 export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
   return async (c, next) => {
@@ -249,14 +265,33 @@ export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
       return next();
     }
 
-    const key = configKey(config);
-    if (!cached || cached.key !== key) {
-      cached = { key, middleware: paymentMiddleware(buildPaidRoutes(datasets, config), resourceServer(config)) };
+    // Free routes never need the facilitator (the middleware only acts on paid routes)
+    if (!findPaidEndpoint(datasets, c.req.method, c.req.path)) return next();
+    const paid = Boolean(c.req.header("payment-signature") || c.req.header("x-payment"));
+
+    let server: x402ResourceServer;
+    try {
+      server = await initializedResourceServer(config);
+    } catch {
+      // The facilitator's edge occasionally answers a new isolate with a
+      // short-lived 403 challenge. Nothing was verified or settled yet, so
+      // try once more.
+      await new Promise((resolve) => setTimeout(resolve, FACILITATOR_RETRY_DELAY_MS));
+      try {
+        server = await initializedResourceServer(config);
+      } catch (err) {
+        return facilitatorUnavailable(c, paid, err);
+      }
+    }
+    if (cached?.server !== server) {
+      cached = {
+        server,
+        middleware: paymentMiddleware(buildPaidRoutes(datasets, config), server, undefined, undefined, false),
+      };
     }
 
     // The middleware only calls through to the handler once a payment has
     // been verified (or the route is free), so the tier is set accurately.
-    const paid = Boolean(c.req.header("payment-signature") || c.req.header("x-payment"));
     let reachedHandler = false;
     const run = () =>
       cached!.middleware(c, async () => {
@@ -265,9 +300,8 @@ export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
         await next();
       });
     let res = await run();
-    // A new isolate loads the facilitator's supported payment kinds first, and
-    // the facilitator's edge occasionally answers with a short-lived 403
-    // challenge. Nothing was verified or settled yet, so try once more.
+    // A facilitator call inside the middleware (e.g. verify) failed before the
+    // handler ran, so nothing was settled yet: try once more.
     if (res instanceof Response && res.status >= 500 && !reachedHandler) {
       await new Promise((resolve) => setTimeout(resolve, FACILITATOR_RETRY_DELAY_MS));
       res = await run();
@@ -280,21 +314,7 @@ export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
         .json<{ error?: unknown }>()
         .then((body) => body?.error)
         .catch(() => undefined);
-      const tag = `[x402 error] ${paid ? "with payment" : "no payment"}: ${errorDetail(reported ?? "unknown")}`;
-      c.set("logDetail", appendLogDetail(c.get("logDetail"), tag));
-      // The facilitator is still unreachable after the retry; the next request
-      // tries again. A 503 tells agents to retry rather than that the API is
-      // broken.
-      return c.json(
-        {
-          error: "payment_facilitator_unavailable",
-          message: "The x402 payment facilitator could not be reached. No payment was taken; retry in a few seconds.",
-          // What the x402 middleware reported (masked, no credentials)
-          detail: errorDetail(reported ?? "unknown"),
-        },
-        503,
-        { "Retry-After": "5" }
-      );
+      return facilitatorUnavailable(c, paid, reported ?? "unknown");
     }
     // Unpaid request: show what the call would return before the agent pays
     if (res instanceof Response && res.status === 402 && !paid && c.req.method === "GET") {

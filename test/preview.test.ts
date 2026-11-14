@@ -164,6 +164,38 @@ describe("402 preview through the x402 middleware", () => {
   });
 });
 
+describe("x402 initialization", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("never contacts the facilitator on free routes, and initializes it in the paid request itself", async () => {
+    // In Workers a request cannot await I/O started by another request: if a
+    // free request started the facilitator call, later paid requests hung (1101)
+    stubSolanaRpc();
+    const rpcFetch = globalThis.fetch;
+    let facilitatorCalls = 0;
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input instanceof Request ? input.url : input);
+      if (url.startsWith("https://facilitator-init.test/")) {
+        facilitatorCalls++;
+        return Response.json({ kinds: [{ x402Version: 2, scheme: "exact", network: "eip155:84532" }], extensions: [], signers: {} });
+      }
+      return rpcFetch(input, init);
+    });
+    const env = {
+      DB: createTestD1(),
+      X402_PAY_TO: "0x0000000000000000000000000000000000000001",
+      X402_NETWORK: "eip155:84532",
+      X402_FACILITATOR_URL: "https://facilitator-init.test",
+    };
+    const free = await app.request("https://example.test/v1/solana-validators/summary", {}, env, ctx);
+    expect(free.status).toBe(200);
+    expect(facilitatorCalls).toBe(0);
+    const paid = await app.request("https://example.test/v1/solana-validators/validators?limit=2", {}, env, ctx);
+    expect(paid.status).toBe(402);
+    expect(facilitatorCalls).toBe(1);
+  });
+});
+
 describe("x402 facilitator outage", () => {
   afterEach(() => vi.unstubAllGlobals());
 
