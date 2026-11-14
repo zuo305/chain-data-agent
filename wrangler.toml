@@ -7,11 +7,11 @@ compatibility_flags = ["nodejs_compat"]
 enabled = true
 
 # Platform tables (usage log, API keys, free MCP calls, data requests).
-# TODO: create "chain-data-agent" in the Cloudflare dashboard (D1) and paste its id.
+# Created 2026-11-14, location hint Eastern North America.
 [[d1_databases]]
 binding = "DB"
 database_name = "chain-data-agent"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "d6550e09-0818-47b7-8b35-83fea7a4e442"
 migrations_dir = "migrations"
 
 [vars]

@@ -102,7 +102,7 @@ Never run `wrangler deploy` from a dev session.
 
 One-time setup in the new Cloudflare account (free plan):
 
-1. D1 → create database `chain-data-agent`; put its id in `wrangler.toml`.
+1. D1 → create database `chain-data-agent`; put its id in `wrangler.toml` (done).
 2. Workers → connect the Git repository `zuo305/chain-data-agent`,
    production branch `main`, build command empty, deploy command
    `npm run deploy`. The build API token needs **D1 Edit**.
@@ -140,7 +140,8 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [x] Platform copied from agent-data-platform; service identity in `src/service.ts`
 - [x] Consolidated platform migration (`0001_platform.sql`)
 - [x] First dataset: Solana validator stats, computed live (1 free, 2 paid endpoints)
-- [ ] New Cloudflare account (free): D1 database, Workers Builds connected to `main`
+- [x] New Cloudflare account (free) and D1 database `chain-data-agent` (Eastern North America, 2026-11-14)
+- [ ] Workers Builds connected to `main`
 - [ ] Real `BASE_URL` in `src/service.ts`; check CPU time per request in production
 - [ ] Payee wallet, CDP API key, Base mainnet
 - [ ] `server.json` and MCP Registry listing (workflow is ready; it runs when `server.json` is added)
