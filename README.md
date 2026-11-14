@@ -154,7 +154,7 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [x] Real `BASE_URL` in `src/service.ts`: https://chain-data-agent.wangzuo305.workers.dev
 - [x] RPC access from production (2026-11-14): free summary live with PublicNode fallback and stale cache; paid routes 503 until a payee is set; `llms.txt`, MCP card, OpenAPI live
 - [x] CPU time in production (2026-11-14): median 1.27 ms over 53 invocations, 0 errors (free plan limit 10 ms)
-- [ ] Payee wallet, CDP API key, Base mainnet
+- [x] Payee wallet (shared with agent-data-platform), own CDP Secret API key (no account permissions), Base mainnet (2026-11-14)
 - [ ] `server.json` and MCP Registry listing (workflow is ready; it runs when `server.json` is added)
 
 ### M1 — Find demand

@@ -15,10 +15,11 @@ database_id = "d6550e09-0818-47b7-8b35-83fea7a4e442"
 migrations_dir = "migrations"
 
 [vars]
-# Wallet that receives x402 payments. Paid endpoints return 503 while empty.
-X402_PAY_TO = ""
+# Wallet that receives x402 payments (shared with agent-data-platform). Paid endpoints return 503 while empty.
+X402_PAY_TO = "0x2D6F7D1e969a3C6218599B348EbBBDdc7f583948"
 # CAIP-2 network id: eip155:84532 = Base Sepolia (testnet), eip155:8453 = Base mainnet
-X402_NETWORK = "eip155:84532"
+# Base mainnet since 2026-11-14: payments are real USDC.
+X402_NETWORK = "eip155:8453"
 # Empty: use the CDP facilitator when CDP_API_KEY_ID / CDP_API_KEY_SECRET secrets
 # are set (required for x402 Bazaar listing), else https://x402.org/facilitator.
 X402_FACILITATOR_URL = ""
