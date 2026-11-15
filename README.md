@@ -74,7 +74,12 @@ Notes:
 - Data is computed on each call from `getVoteAccounts`, `getEpochInfo` and
   `getBlockProduction` (mainnet-beta). RPC results are fresh for 60 s in the
   Workers cache; when every endpoint refuses, an answer up to 1 hour old is
-  served instead. Every response has `meta.data_age_seconds`.
+  served instead: from the edge cache of that location or, failing that,
+  from the `rpc_snapshot` table in D1, which the cron trigger refreshes every
+  10 minutes with the raw (unparsed) RPC answers (3 rows written per run,
+  ~430 a day). Every response has `meta.data_age_seconds`. Added on
+  2026-11-15 after a paid call got 503 when both free endpoints refused and
+  the serving location had no cached answer (the payment was not taken).
 - Measured 2026-11-14: `getVoteAccounts` is ~315 KB for ~700 validators.
   Parsing plus computing takes ~3 ms warm, 4–7 ms cold (free plan limit:
   10 ms CPU per request).

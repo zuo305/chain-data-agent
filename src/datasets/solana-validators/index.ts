@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import type { AppEnv } from "../../types";
 import { type Attribution, type Dataset, badRequest, dataResponse } from "../../platform/dataset";
 import { appendLogDetail } from "../../platform/telemetry";
-import { RPC_CACHE_SECONDS, RpcUnavailableError, fetchSnapshot, type ChainSnapshot } from "./rpc";
+import { RPC_CACHE_SECONDS, RpcUnavailableError, fetchSnapshot, storeSnapshot, type ChainSnapshot } from "./rpc";
 import {
   SORT_KEYS,
   type SortKey,
@@ -113,6 +113,8 @@ export const solanaValidators: Dataset = {
     "Computed from public chain state on each call (at most a minute old); no history is stored yet.",
   attribution: ATTRIBUTION,
   tags: ["solana", "validators", "staking", "crypto", "onchain"],
+  // Keeps the last good RPC answers in D1 as a fallback for every location
+  sync: storeSnapshot,
   endpoints: [
     {
       method: "GET",

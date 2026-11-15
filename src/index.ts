@@ -38,8 +38,12 @@ app.onError((err, c) => {
 export default {
   fetch: app.fetch,
   // Cron trigger (see wrangler.toml): keeps every dataset in sync
-  async scheduled(_controller: ScheduledController, env: Bindings, ctx: ExecutionContext) {
+  async scheduled(controller: ScheduledController, env: Bindings, ctx: ExecutionContext) {
     ctx.waitUntil(syncDatasets(datasets, env));
-    ctx.waitUntil(pruneFreeCalls(env.DB).catch((err) => console.error("Pruning free MCP calls failed", err)));
+    // Free call counters only need pruning once a day (the first run after 03:00 UTC)
+    const at = new Date(controller.scheduledTime);
+    if (at.getUTCHours() === 3 && at.getUTCMinutes() < 10) {
+      ctx.waitUntil(pruneFreeCalls(env.DB).catch((err) => console.error("Pruning free MCP calls failed", err)));
+    }
   },
 } satisfies ExportedHandler<Bindings>;

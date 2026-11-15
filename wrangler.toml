@@ -33,5 +33,7 @@ CONTACT_EMAIL = "johnzuo305@gmail.com"
 INDEX402_VERIFY_HASH = "a3663ce1ff6c448385c7ff9603710c2b8195653685fa44e2026aee640c5a7727"
 
 [triggers]
-# Daily pruning of free MCP call counters. Free plan: max 5 cron triggers per account.
-crons = ["17 3 * * *"]
+# Every 10 minutes: store the last good Solana RPC answers in D1 (fallback for
+# every location); free MCP call counters are pruned on the 03:00 UTC run.
+# Free plan: max 5 cron triggers per account.
+crons = ["*/10 * * * *"]

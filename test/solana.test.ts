@@ -288,3 +288,53 @@ describe("RPC cache", () => {
     expect(stale.fetchedAt).toBe(first.fetchedAt);
   });
 });
+
+describe("RPC snapshot in D1", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it("is stored by the cron and serves every location when all endpoints refuse", async () => {
+    const { storeSnapshot } = await import("../src/datasets/solana-validators/rpc");
+    const db = createTestD1();
+    stubSolanaRpc();
+    expect(await storeSnapshot({ DB: db } as never)).toBe(3);
+    expect((db.sqlite.prepare("SELECT count(*) n FROM rpc_snapshot").get() as { n: number }).n).toBe(3);
+
+    // Every endpoint now refuses and there is no edge cache (unit tests have none)
+    stubSolanaRpc({ fail: true });
+    const app = new Hono<AppEnv>();
+    mountDatasets(app, [solanaValidators]);
+    const res = await app.request("/v1/solana-validators/summary", {}, { DB: db });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as any;
+    expect(body.data.validators.total).toBe(solanaSnapshot().voteAccounts.current.length + solanaSnapshot().voteAccounts.delinquent.length);
+    expect(body.meta.data_age_seconds).toBeGreaterThanOrEqual(0);
+  });
+
+  it("keeps the previous row for a call no endpoint answers, and ignores rows older than an hour", async () => {
+    const { storeSnapshot, RPC_STALE_SECONDS } = await import("../src/datasets/solana-validators/rpc");
+    const db = createTestD1();
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-15T00:00:00Z"));
+    stubSolanaRpc();
+    await storeSnapshot({ DB: db } as never);
+    stubSolanaRpc({ fail: true });
+    expect(await storeSnapshot({ DB: db } as never)).toBe(0);
+    expect((db.sqlite.prepare("SELECT count(*) n FROM rpc_snapshot").get() as { n: number }).n).toBe(3);
+
+    vi.setSystemTime(new Date(Date.now() + (RPC_STALE_SECONDS + 60) * 1000));
+    const app = new Hono<AppEnv>();
+    mountDatasets(app, [solanaValidators]);
+    const res = await app.request("/v1/solana-validators/summary", {}, { DB: db });
+    expect(res.status).toBe(503);
+  });
+
+  it("does not store an RPC error answer", async () => {
+    const { storeSnapshot } = await import("../src/datasets/solana-validators/rpc");
+    const db = createTestD1();
+    vi.stubGlobal("fetch", async () => Response.json({ jsonrpc: "2.0", id: 1, error: { code: -32005, message: "busy" } }));
+    expect(await storeSnapshot({ DB: db } as never)).toBe(0);
+  });
+});

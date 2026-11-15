@@ -6,7 +6,9 @@ import type { Bindings } from "../../types";
 // parsing the full vote account list costs about 2 ms of CPU. A cached
 // answer is fresh for RPC_CACHE_SECONDS; when every endpoint refuses, an
 // answer up to RPC_STALE_SECONDS old is served instead, and its age is
-// reported to the caller.
+// reported to the caller. That answer comes from the edge cache of the
+// serving location or, failing that, from the snapshot the cron trigger
+// stores in D1 every 10 minutes (shared by every location).
 
 export const PUBLIC_RPC_URL = "https://api.mainnet-beta.solana.com";
 // Free endpoints without an API key, tried in order after SOLANA_RPC_URL.
@@ -61,7 +63,85 @@ export async function rpcCallTimed<T>(env: Bindings, method: string, params: unk
     }
   }
   if (cached) return cached;
+  const stored = await readStoredAnswer<T>(env, method, params);
+  if (stored) return stored;
   throw new RpcUnavailableError(`${method}: ${failures.join("; ")}`);
+}
+
+// Snapshot of the calls every endpoint makes, kept in D1 by the cron trigger
+const COMMITMENT = { commitment: "confirmed" };
+export const SNAPSHOT_CALLS: Array<{ method: string; params: unknown[] }> = [
+  { method: "getEpochInfo", params: [COMMITMENT] },
+  { method: "getVoteAccounts", params: [COMMITMENT] },
+  { method: "getBlockProduction", params: [COMMITMENT] },
+];
+
+export const snapshotKey = (method: string, params: unknown[]) => `${method}:${JSON.stringify(params)}`;
+
+async function readStoredAnswer<T>(env: Bindings, method: string, params: unknown[]): Promise<Timed<T> | null> {
+  if (!env.DB) return null;
+  try {
+    const row = await env.DB.prepare("SELECT fetched_at, body FROM rpc_snapshot WHERE call_key = ?")
+      .bind(snapshotKey(method, params))
+      .first<{ fetched_at: number; body: string }>();
+    if (!row || Date.now() - row.fetched_at > RPC_STALE_SECONDS * 1000) return null;
+    const json = JSON.parse(row.body) as RpcResponse<T>;
+    return json.result === undefined ? null : { result: json.result, fetchedAt: row.fetched_at };
+  } catch (err) {
+    console.error("Reading the stored RPC snapshot failed", err);
+    return null;
+  }
+}
+
+// Cron: stores the current answer of every snapshot call, as raw response
+// text (parsing and re-serialising the ~315 KB vote account list would cost
+// several ms of the 10 ms CPU budget). A call no endpoint answers keeps its
+// previous row. Returns the number of calls stored.
+export async function storeSnapshot(env: Bindings): Promise<number> {
+  const configured = env.SOLANA_RPC_URL?.trim();
+  const endpoints = configured ? [configured, ...FALLBACK_RPC_URLS] : FALLBACK_RPC_URLS;
+  const rows: Array<{ key: string; body: string }> = [];
+  for (const { method, params } of SNAPSHOT_CALLS) {
+    for (const url of endpoints) {
+      const body = await fetchRawAnswer(url, method, params);
+      if (body) {
+        rows.push({ key: snapshotKey(method, params), body });
+        break;
+      }
+    }
+  }
+  if (!rows.length) return 0;
+  const now = Date.now();
+  await env.DB.batch(
+    rows.map((r) =>
+      env.DB.prepare("INSERT OR REPLACE INTO rpc_snapshot (call_key, fetched_at, body) VALUES (?, ?, ?)").bind(
+        r.key,
+        now,
+        r.body
+      )
+    )
+  );
+  return rows.length;
+}
+
+// Response text of a successful call, or null. Checked without parsing: a
+// JSON-RPC success carries "result" and no top-level "error" before it.
+async function fetchRawAnswer(url: string, method: string, params: unknown[]): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+    const text = await res.text();
+    const result = text.indexOf('"result"');
+    const error = text.indexOf('"error"');
+    return result >= 0 && (error < 0 || error > result) ? text : null;
+  } catch {
+    return null;
+  }
 }
 
 async function callEndpoint<T>(url: string, method: string, params: unknown[]): Promise<T> {
@@ -139,11 +219,10 @@ export type ChainSnapshot = {
 };
 
 export async function fetchSnapshot(env: Bindings): Promise<ChainSnapshot> {
-  const commitment = { commitment: "confirmed" };
   const [epochInfo, voteAccounts, blockProduction] = await Promise.all([
-    rpcCallTimed<RawEpochInfo>(env, "getEpochInfo", [commitment]),
-    rpcCallTimed<RawVoteAccounts>(env, "getVoteAccounts", [commitment]),
-    rpcCallTimed<RawBlockProduction>(env, "getBlockProduction", [commitment]),
+    rpcCallTimed<RawEpochInfo>(env, "getEpochInfo", [COMMITMENT]),
+    rpcCallTimed<RawVoteAccounts>(env, "getVoteAccounts", [COMMITMENT]),
+    rpcCallTimed<RawBlockProduction>(env, "getBlockProduction", [COMMITMENT]),
   ]);
   return {
     epochInfo: epochInfo.result,
