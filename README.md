@@ -173,7 +173,7 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 
 ### M1 — Find demand
 - [x] `ADMIN_TOKEN` and `CLIENT_ID_SECRET` set as Worker secrets (2026-11-15): `/admin/usage` enabled, anonymous client ids from then on
-- [ ] List in the x402 Bazaar: run the manual workflow **List in x402 Bazaar** (`.github/workflows/bazaar-list.yml`), which pays each of the 4 paid resources once ($0.006 in total) from the repository secret `PAYER_PRIVATE_KEY` (a dedicated wallet with a little USDC on Base). `npm run bazaar:list` without `--pay` checks the examples for free (all 4 ok on 2026-11-14)
+- [x] Both paid HTTP routes listed in the CDP x402 Bazaar (seen 2026-11-15) without paying ourselves: the settlements from PayAPI's review and from x402 crawlers were enough. The 2 MCP tools are not listed yet; the manual workflow **List in x402 Bazaar** (`.github/workflows/bazaar-list.yml`, repository secret `PAYER_PRIVATE_KEY`) can pay them once with `only` = `tool` ($0.003)
 - [x] 402 Index (2026-11-14): both paid routes registered through its API (category `crypto`) and approved after domain verification via `/.well-known/402index-verify.txt` (`INDEX402_VERIFY_HASH`); the claim token for editing listings is kept outside the repo
 - [x] agent-tools.cloud (2026-11-14): both paid routes auto-verified and listed, MCP server indexed (submitted through its API, contact johnzuo305@gmail.com)
 - [ ] PayAPI Market: both paid routes submitted through its API on 2026-11-14 (pending review). Its review pays one call per route from its own wallet, which also gets the HTTP routes listed in the CDP Bazaar
