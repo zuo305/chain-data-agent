@@ -59,11 +59,14 @@ the project plan, architecture and milestones.
 
 ## Checking usage
 
-Production usage stats: `curl -s -H "Authorization: Bearer $CHAIN_ADMIN_TOKEN"
+Production usage stats: `curl -s
 https://chain-data-agent.wangzuo305.workers.dev/admin/usage?days=7`
-(`CHAIN_ADMIN_TOKEN` is an environment variable of the cloud environment and
-holds this Worker's `ADMIN_TOKEN` secret; `ADMIN_TOKEN` in the environment
-belongs to agent-data-platform. Never print or commit either.) Anonymous
+with no Authorization header: the cloud environment has a network secret for
+this host that adds `Authorization: Bearer <ADMIN_TOKEN>` to every request,
+so the token never appears in the session. (Public routes ignore Bearer
+values that are not `adp_` API keys, so the header is harmless elsewhere.
+`ADMIN_TOKEN` in the environment variables belongs to agent-data-platform.)
+A 401 means the network secret is missing or outdated. Anonymous
 client ids (`CLIENT_ID_SECRET`) are recorded since 2026-11-15; earlier rows
 have none. Our own test traffic shows up there too.
 
