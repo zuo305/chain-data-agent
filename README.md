@@ -80,6 +80,8 @@ Notes:
   ~430 a day). Every response has `meta.data_age_seconds`. Added on
   2026-11-15 after a paid call got 503 when both free endpoints refused and
   the serving location had no cached answer (the payment was not taken).
+  First stored run 2026-11-15 20:40 UTC: 3 rows (vote accounts 315 KB), 6 ms
+  CPU, ~1 s wall time.
 - Measured 2026-11-14: `getVoteAccounts` is ~315 KB for ~700 validators.
   Parsing plus computing takes ~3 ms warm, 4–7 ms cold (free plan limit:
   10 ms CPU per request).

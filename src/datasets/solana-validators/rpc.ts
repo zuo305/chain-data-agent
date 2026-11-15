@@ -101,15 +101,20 @@ export async function storeSnapshot(env: Bindings): Promise<number> {
   const configured = env.SOLANA_RPC_URL?.trim();
   const endpoints = configured ? [configured, ...FALLBACK_RPC_URLS] : FALLBACK_RPC_URLS;
   const rows: Array<{ key: string; body: string }> = [];
+  const missing: string[] = [];
   for (const { method, params } of SNAPSHOT_CALLS) {
+    let stored = false;
     for (const url of endpoints) {
       const body = await fetchRawAnswer(url, method, params);
       if (body) {
         rows.push({ key: snapshotKey(method, params), body });
+        stored = true;
         break;
       }
     }
+    if (!stored) missing.push(method);
   }
+  if (missing.length) console.warn(`RPC snapshot: no endpoint answered ${missing.join(", ")}; keeping the previous rows`);
   if (!rows.length) return 0;
   const now = Date.now();
   await env.DB.batch(
