@@ -57,6 +57,24 @@ the project plan, architecture and milestones.
 - Secrets never go in the repo (including RPC URLs that embed an API key).
   Public config (e.g. the payee wallet address) lives in `wrangler.toml` `[vars]`.
 
+## Checking usage
+
+Production usage stats: `curl -s -H "Authorization: Bearer $CHAIN_ADMIN_TOKEN"
+https://chain-data-agent.wangzuo305.workers.dev/admin/usage?days=7`
+(`CHAIN_ADMIN_TOKEN` is an environment variable of the cloud environment and
+holds this Worker's `ADMIN_TOKEN` secret; `ADMIN_TOKEN` in the environment
+belongs to agent-data-platform. Never print or commit either.) Anonymous
+client ids (`CLIENT_ID_SECRET`) are recorded since 2026-11-15; earlier rows
+have none. Our own test traffic shows up there too.
+
+Routine requests from self-identified bots are logged as a 1-in-10 sample
+(`usage_log.weight` = 10); ad hoc queries must sum `weight`, not count rows.
+
+To tell real customers from verifiers, look at the payer wallets of paid
+calls on Base (USDC `Transfer` logs to the payee). Base produces a block
+every 0.2 s, so convert times to block numbers with that rate. Wallets that
+pay dozens of x402 services within an hour are crawlers or verifiers.
+
 ## Calling production
 
 When calling production by hand (curl, scripts), send
