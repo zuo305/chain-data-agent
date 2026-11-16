@@ -11,6 +11,7 @@ import { wellKnownRoutes } from "./platform/wellknown";
 import { datasets } from "./datasets/registry";
 import { pruneFreeCalls } from "./platform/freecalls";
 import { dataRequestRoutes } from "./platform/requests";
+import { CRONS } from "./service";
 
 export const app = new Hono<AppEnv>();
 
@@ -39,10 +40,10 @@ export default {
   fetch: app.fetch,
   // Cron trigger (see wrangler.toml): keeps every dataset in sync
   async scheduled(controller: ScheduledController, env: Bindings, ctx: ExecutionContext) {
-    ctx.waitUntil(syncDatasets(datasets, env));
-    // Free call counters only need pruning once a day (the first run after 03:00 UTC)
+    ctx.waitUntil(syncDatasets(datasets, env, controller.cron));
+    // Free call counters only need pruning once a day (the 03:00 UTC run of the 10-minute cron)
     const at = new Date(controller.scheduledTime);
-    if (at.getUTCHours() === 3 && at.getUTCMinutes() < 10) {
+    if (controller.cron === CRONS.tenMinutes && at.getUTCHours() === 3 && at.getUTCMinutes() < 10) {
       ctx.waitUntil(pruneFreeCalls(env.DB).catch((err) => console.error("Pruning free MCP calls failed", err)));
     }
   },

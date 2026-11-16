@@ -78,6 +78,10 @@ export type Dataset = {
   prompts?: DatasetPrompt[];
   // Called from the cron trigger to keep the dataset fresh.
   sync?: (env: Bindings) => Promise<unknown>;
+  // Cron expression (as in wrangler.toml [triggers]) whose runs call sync;
+  // unset = every cron run. Lets a heavy sync get an invocation (and CPU
+  // budget) of its own.
+  syncCron?: string;
   // Freshness and coverage, shown in the catalog.
   status?: (env: Bindings) => Promise<Record<string, unknown>>;
 };
@@ -200,10 +204,12 @@ async function readBodyParams(c: Context<AppEnv>): Promise<Record<string, string
   return params;
 }
 
-// Runs every dataset's sync; one failing dataset does not stop the others.
-export async function syncDatasets(datasets: Dataset[], env: Bindings): Promise<void> {
+// Runs the sync of every dataset scheduled on this cron; one failing dataset
+// does not stop the others.
+export async function syncDatasets(datasets: Dataset[], env: Bindings, cron?: string): Promise<void> {
   for (const dataset of datasets) {
     if (!dataset.sync) continue;
+    if (dataset.syncCron && cron !== undefined && dataset.syncCron !== cron) continue;
     try {
       await dataset.sync(env);
     } catch (err) {

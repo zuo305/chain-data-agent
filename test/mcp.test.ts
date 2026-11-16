@@ -87,6 +87,9 @@ describe("MCP server", () => {
       "solana_validators_get_network_summary",
       "solana_validators_get_validator",
       "solana_validators_list_validators",
+      "solana_unlocks_get_unlock_summary",
+      "solana_unlocks_get_unlock_calendar",
+      "solana_unlocks_list_unlocks",
       "request_data",
     ]);
     const get = tools.find((t) => t.name === "solana_validators_get_validator")!;
@@ -116,7 +119,7 @@ describe("MCP server", () => {
 
   it("lists and renders prompts", async () => {
     const list = (await rpc(createTestD1(), "prompts/list")).result.prompts as Array<any>;
-    expect(list.map((p) => p.name)).toEqual(["solana_check_validator"]);
+    expect(list.map((p) => p.name)).toEqual(["solana_check_validator", "solana_unlock_outlook"]);
     expect(list[0].arguments.find((a: any) => a.name === "vote").required).toBe(true);
     const { result } = await rpc(createTestD1(), "prompts/get", {
       name: "solana_check_validator",
@@ -133,6 +136,7 @@ describe("MCP server", () => {
     expect(list.map((r) => r.uri)).toEqual([
       "http://localhost/llms.txt",
       "http://localhost/docs/solana-validators.md",
+      "http://localhost/docs/solana-unlocks.md",
     ]);
     const { result } = await rpc(createTestD1(), "resources/read", { uri: "http://localhost/docs/solana-validators.md" });
     expect(result.contents[0].text).toContain("MCP tool: `solana_validators_list_validators`");

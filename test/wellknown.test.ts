@@ -76,7 +76,7 @@ describe("discovery files", () => {
         expect(tool.outputSchema, tool.name).toMatchObject({ type: "object", required: expect.arrayContaining(["attribution"]) });
         expect(tool.annotations.destructiveHint).toBe(false);
       }
-      expect(card.prompts).toHaveLength(1);
+      expect(card.prompts).toHaveLength(2);
       expect(card.resources.map((r: any) => r.uri)).toContain("https://example.test/docs/solana-validators.md");
     }
   });

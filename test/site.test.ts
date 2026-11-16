@@ -20,7 +20,7 @@ describe("human pages", () => {
     expect(html).toContain("solana_validators_list_validators");
     expect(html).toContain('<meta name="viewport"');
     expect(html).toContain("<b>In plain words:</b>");
-    expect(html).toContain("look up live Solana validator stats data for you");
+    expect(html).toContain("look up live Solana validator stats and SOL stake unlock calendar data for you");
     expect(html).toContain("Each answer costs $0.001 to $0.002");
   });
 

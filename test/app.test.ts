@@ -107,6 +107,8 @@ describe("x402", () => {
     expect(Object.keys(routes)).toEqual([
       "GET /v1/solana-validators/validator",
       "GET /v1/solana-validators/validators",
+      "GET /v1/solana-unlocks/calendar",
+      "GET /v1/solana-unlocks/unlocks",
     ]);
     expect(routes["GET /v1/solana-validators/validator"].accepts.price).toBe("$0.001");
     expect(routes["GET /v1/solana-validators/validators"].accepts.price).toBe("$0.002");

@@ -11,7 +11,7 @@ first month showed that discovery works but demand needs a better fit: its
 callers are crypto-native agents, and NSW planning data was not what they
 needed.
 
-**Datasets:** Solana validator stats (live).
+**Datasets:** Solana validator stats (live), SOL stake unlock calendar (hourly).
 
 ## Principles
 
@@ -51,7 +51,8 @@ src/
 ├── platform/                 # Dataset-agnostic layer (from agent-data-platform)
 └── datasets/
     ├── registry.ts           # The list of live datasets
-    └── solana-validators/    # Live Solana network and validator stats
+    ├── solana-validators/    # Live Solana network and validator stats
+    └── solana-unlocks/       # SOL stake lockup calendar (hourly snapshot in D1)
         ├── rpc.ts            # JSON-RPC client with a 60 s Workers cache
         ├── stats.ts          # Pure computations over one chain snapshot
         ├── examples.ts       # Output examples for Bazaar and docs
@@ -102,11 +103,39 @@ Notes:
   stale fallback. A free-tier provider key goes in a Secret, not in
   `wrangler.toml`.
 
+## SOL stake unlock calendar (v1)
+
+| Endpoint | MCP tool | Price | Description |
+|---|---|---|---|
+| `GET /v1/solana-unlocks/summary` | `solana_unlocks_get_unlock_summary` | free | Locked SOL (and delegated part), next unlock day, SOL unlocking in the next 7/30/90/365 days, last unlock date |
+| `GET /v1/solana-unlocks/calendar` | `solana_unlocks_get_unlock_calendar` | $0.002 | SOL unlocking per day, week or month between `from` and `to` (default next 90 days), with account count, delegated part and largest account |
+| `GET /v1/solana-unlocks/unlocks` | `solana_unlocks_list_unlocks` | $0.002 | Individual unlocks (stake account, SOL, time, withdraw authority, custodian, vote account) filtered by date, `min_sol`, `withdraw_authority`, `custodian` |
+
+Notes:
+- Source: mainnet-beta stake accounts whose `lockup.unix_timestamp` is in
+  the future, read hourly (cron `5 * * * *`, its own invocation) with
+  `getProgramAccounts` filtered by the timestamp's 4th byte (9 windows of
+  ~194 days, ~4.8 years ahead). No lockup uses `lockup.epoch` as of
+  2026-11. The parsed list is stored as one `rpc_snapshot` row (~150 KB);
+  requests read that row. A failed refresh keeps the previous snapshot;
+  snapshots older than 7 days are not served.
+- Only `api.mainnet-beta.solana.com` serves these queries for free
+  (PublicNode requires a personal token for `getProgramAccounts`).
+- 2026-11-15 snapshot: 719 lockups, 16.48M SOL locked (15.83M delegated),
+  1.03M SOL unlocking in the next 30 days, last unlock 2028-11-11. Refresh:
+  ~6.6 s wall time. Request CPU: < 1.5 ms (dates are grouped by day number;
+  base58 keys are encoded only for returned rows and memoised).
+- A lockup end makes SOL withdrawable, not sold; delegated stake must be
+  deactivated (about one epoch) first, and the custodian can lift a lockup
+  early. Responses say so in `meta.notes`.
+- Background: `notes/research/2026-11-15-token-unlocks-feasibility.md`
+  (why a general token unlock calendar from chain data was not feasible).
+
 ## Data sources
 
 | Source | Terms | Commercial use | Status |
 |---|---|---|---|
-| Solana mainnet-beta chain state (JSON-RPC) | Public blockchain data | Yes | Live as `solana-validators` |
+| Solana mainnet-beta chain state (JSON-RPC) | Public blockchain data | Yes | Live as `solana-validators` and `solana-unlocks` |
 | DefiLlama unlocks / emissions | Site terms: personal, non-commercial use | **No** (without a licence) | Excluded |
 | beaconcha.in API | API terms forbid redistribution and commercial exploitation | **No** | Excluded |
 | Tokenomist, Messari, CryptoRank, Rated | Paid APIs, no resale | **No** | Excluded |
@@ -190,6 +219,9 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [ ] Decide after ~2 weeks of listings: keep, change or drop Solana validator stats
 
 ### M2 — Next experiments (each one only after a demand check)
-- [ ] Token unlocks from on-chain vesting contracts (Sablier, Hedgey, Streamflow): measure coverage of the 10–20 largest upcoming unlocks first; below ~50% the on-chain route does not work
+- [x] Token unlock feasibility check (2026-11-15): 9 of 23 large upcoming unlocks readable on-chain, the largest (MON) and most L1 unlocks custodial; a general calendar is not feasible. See `notes/research/2026-11-15-token-unlocks-feasibility.md`
+- [x] SOL stake unlock calendar (`solana-unlocks`, 2026-11-16): 1 free + 2 paid endpoints from an hourly stake lockup snapshot
+- [ ] List the unlock endpoints in the directories (402 Index, agent-tools.cloud, PayAPI)
+- [ ] Solana vesting escrows by mint (Streamflow + Jupiter Lock), if the unlock calendar finds users
 - [ ] Validator history (needs storage, e.g. a daily GitHub Actions snapshot) once the live endpoints have users
 - [ ] Ethereum validators: on hold (≈1M validators do not fit the free D1 tier; operator labels have licence issues)
