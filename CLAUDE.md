@@ -77,6 +77,11 @@ To tell real customers from verifiers, look at the payer wallets of paid
 calls on Base (USDC `Transfer` logs to the payee). Base produces a block
 every 0.2 s, so convert times to block numbers with that rate. Wallets that
 pay dozens of x402 services within an hour are crawlers or verifiers.
+A wallet that comes back is not demand by itself: check what else it pays in
+the same burst (the CDP discovery API, `/platform/v2/x402/discovery/merchant
+?payTo=<recipient>`, names the services). Known sampler: `0xaa34…1db3` pays
+20-28 unrelated x402 services (weather, fortune demos, JSON validators, chat
+models, ...) every 6 hours at 01/07/13/19 UTC, including our cheapest route.
 
 ## Calling production
 
