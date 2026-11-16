@@ -2,15 +2,16 @@ import type { Bindings } from "../../types";
 import { PUBLIC_RPC_URL } from "../solana-validators/rpc";
 
 // SOL stake accounts whose lockup has not expired yet. A lockup stops the
-// withdraw authority from withdrawing (or the staker from re-delegating to a
-// new authority) before lockup.unix_timestamp; the custodian can lift it
-// early. The hourly cron reads them with getProgramAccounts and stores one
-// parsed snapshot row in D1; requests only read that row.
+// withdraw authority from withdrawing before lockup.unix_timestamp; the
+// custodian can lift it early. mainnet-beta refuses getProgramAccounts from
+// Cloudflare, so an hourly GitHub Actions workflow (scripts/refresh-lockups.ts)
+// collects them and pushes the parsed list to the Worker, which stores it as
+// one D1 row; requests only read that row.
 
 export const STAKE_PROGRAM = "Stake11111111111111111111111111111111111111";
 export const LOCKUPS_KEY = "sol-stake-lockups:v1";
-// Rows older than this are not served (lockups change slowly; the cron
-// refreshes hourly, so this only matters when the RPC refuses for days)
+// Rows older than this are not served (lockups change slowly; the workflow
+// refreshes hourly, so this only matters when it fails for days)
 export const LOCKUPS_MAX_AGE_SECONDS = 7 * 86_400;
 
 // StakeStateV2 (200 bytes): state u32 @0, rent_exempt_reserve u64 @4,
@@ -89,35 +90,49 @@ export function parseLockup(account: ProgramAccount, now: number): StoredLockup 
   ];
 }
 
-// Cron: refreshes the snapshot row. Any failed window aborts the refresh so a
-// partial list never replaces a complete one. Returns the number of lockups.
-export async function refreshLockups(env: Bindings): Promise<number> {
-  const now = Math.floor(Date.now() / 1000);
+// All pending lockups from one endpoint; throws if any window fails, so a
+// partial list never replaces a complete one
+export async function collectLockups(url: string, now: number): Promise<StoredLockup[]> {
   const first = Math.floor(now / 2 ** 24) & 0xff;
-  // publicnode.com refuses getProgramAccounts without a personal token
-  const endpoints = [env.SOLANA_RPC_URL?.trim(), PUBLIC_RPC_URL].filter((u): u is string => Boolean(u));
-  let accounts: ProgramAccount[] | null = null;
-  const failures: string[] = [];
-  for (const url of endpoints) {
-    try {
-      const all: ProgramAccount[] = [];
-      for (let w = first; w <= first + LOOKAHEAD_WINDOWS; w++) all.push(...(await fetchWindow(url, w)));
-      accounts = all;
-      break;
-    } catch (err) {
-      failures.push(`${url === endpoints[0] && env.SOLANA_RPC_URL ? "configured endpoint" : new URL(url).host}: ${err instanceof Error ? err.message : String(err)}`);
-    }
-  }
-  if (!accounts) {
-    console.warn(`SOL lockups: refresh failed (${failures.join("; ")}); keeping the previous snapshot`);
-    return 0;
-  }
-  const lockups = accounts.map((a) => parseLockup(a, now)).filter((l): l is StoredLockup => l !== null);
-  const snapshot: LockupSnapshot = { refreshedAt: Date.now(), lockups };
+  const accounts: ProgramAccount[] = [];
+  for (let w = first; w <= first + LOOKAHEAD_WINDOWS; w++) accounts.push(...(await fetchWindow(url, w)));
+  return accounts.map((a) => parseLockup(a, now)).filter((l): l is StoredLockup => l !== null);
+}
+
+export async function storeLockups(env: Bindings, snapshot: LockupSnapshot): Promise<void> {
   await env.DB.prepare("INSERT OR REPLACE INTO rpc_snapshot (call_key, fetched_at, body) VALUES (?, ?, ?)")
     .bind(LOCKUPS_KEY, snapshot.refreshedAt, JSON.stringify(snapshot))
     .run();
-  return lockups.length;
+}
+
+const B64_KEY = /^[A-Za-z0-9+/]{43}=$/;
+const MAX_LOCKUPS = 50_000;
+
+// A pushed snapshot in the stored shape, or the reason it is not
+export function validateSnapshot(body: unknown, nowMs = Date.now()): LockupSnapshot | string {
+  if (!body || typeof body !== "object") return "body must be an object";
+  const { refreshedAt, lockups } = body as Record<string, unknown>;
+  if (typeof refreshedAt !== "number" || refreshedAt > nowMs + 300_000 || refreshedAt < nowMs - 86_400_000) {
+    return "refreshedAt must be a recent time in ms";
+  }
+  if (!Array.isArray(lockups) || lockups.length > MAX_LOCKUPS) return `lockups must be an array of at most ${MAX_LOCKUPS}`;
+  for (const l of lockups) {
+    if (
+      !Array.isArray(l) ||
+      l.length !== 6 ||
+      typeof l[0] !== "string" ||
+      !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(l[0]) ||
+      !Number.isSafeInteger(l[1]) ||
+      l[1] < 0 ||
+      !Number.isSafeInteger(l[2]) ||
+      !B64_KEY.test(l[3]) ||
+      !B64_KEY.test(l[4]) ||
+      (l[5] !== "" && !B64_KEY.test(l[5]))
+    ) {
+      return "each lockup must be [stake account, lamports, unlocks_at, withdrawer, custodian, voter or \"\"]";
+    }
+  }
+  return { refreshedAt, lockups: lockups as StoredLockup[] };
 }
 
 // Parsed snapshot per isolate, reloaded when the stored row changes

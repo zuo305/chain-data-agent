@@ -7,7 +7,14 @@ export const BASE_URL = "https://chain-data-agent.wangzuo305.workers.dev";
 // Cron expressions of wrangler.toml [triggers]; datasets pick one as syncCron
 export const CRONS = {
   tenMinutes: "*/10 * * * *",
-  hourly: "5 * * * *",
+} as const;
+
+// Who may push data to POST /internal/ingest/<dataset>: GitHub Actions
+// workflows of this repository on main, with an OIDC token for this audience
+export const INGEST = {
+  githubRepository: "zuo305/chain-data-agent",
+  ref: "refs/heads/main",
+  audience: BASE_URL,
 } as const;
 
 export const SERVICE = {

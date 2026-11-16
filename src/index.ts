@@ -11,6 +11,7 @@ import { wellKnownRoutes } from "./platform/wellknown";
 import { datasets } from "./datasets/registry";
 import { pruneFreeCalls } from "./platform/freecalls";
 import { dataRequestRoutes } from "./platform/requests";
+import { ingestRoutes } from "./platform/ingest";
 import { CRONS } from "./service";
 
 export const app = new Hono<AppEnv>();
@@ -27,6 +28,7 @@ app.route("/", mcpRoutes(datasets));
 app.route("/", admin);
 app.route("/", wellKnownRoutes(datasets));
 app.route("/", dataRequestRoutes);
+app.route("/", ingestRoutes(datasets));
 mountDatasets(app, datasets);
 
 app.notFound((c) => c.json({ error: "not_found", message: "See /v1/datasets for available endpoints." }, 404));

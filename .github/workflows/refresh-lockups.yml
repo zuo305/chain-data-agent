@@ -1,0 +1,30 @@
+name: Refresh SOL lockups
+
+# Hourly: collects pending SOL stake lockups from mainnet-beta and pushes them
+# to the Worker (mainnet-beta refuses getProgramAccounts from Cloudflare).
+# Authenticated with this workflow's OIDC token; no secrets needed.
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: refresh-lockups
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run refresh-lockups

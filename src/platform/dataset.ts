@@ -82,6 +82,10 @@ export type Dataset = {
   // unset = every cron run. Lets a heavy sync get an invocation (and CPU
   // budget) of its own.
   syncCron?: string;
+  // Accepts data pushed to POST /internal/ingest/<id> by a GitHub Actions
+  // workflow of our repository (OIDC-authenticated, see ingest.ts), for
+  // sources that refuse requests from Cloudflare.
+  ingest?: (c: Context<AppEnv>, body: unknown) => Promise<Response>;
   // Freshness and coverage, shown in the catalog.
   status?: (env: Bindings) => Promise<Record<string, unknown>>;
 };

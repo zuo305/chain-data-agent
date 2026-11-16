@@ -13,7 +13,8 @@
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "x402:pay": "tsx scripts/x402-pay.ts",
     "x402:mcp-pay": "tsx scripts/x402-mcp-pay.ts",
-    "bazaar:list": "tsx scripts/bazaar-list.ts"
+    "bazaar:list": "tsx scripts/bazaar-list.ts",
+    "refresh-lockups": "tsx scripts/refresh-lockups.ts"
   },
   "dependencies": {
     "@coinbase/x402": "^2.1.0",

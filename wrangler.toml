@@ -35,7 +35,8 @@ INDEX402_VERIFY_HASH = "a3663ce1ff6c448385c7ff9603710c2b8195653685fa44e2026aee64
 [triggers]
 # Every 10 minutes: store the last good Solana RPC answers in D1 (fallback for
 # every location); free MCP call counters are pruned on the 03:00 UTC run.
-# Every hour (minute 5): refresh the SOL stake lockup calendar (its own
-# invocation, so it gets a full CPU budget). Must match the syncCron values in
-# src/datasets. Free plan: max 5 cron triggers per account.
-crons = ["*/10 * * * *", "5 * * * *"]
+# The SOL stake lockup calendar is refreshed by a GitHub Actions workflow
+# (.github/workflows/refresh-lockups.yml): mainnet-beta refuses
+# getProgramAccounts from Cloudflare. Cron values must match the syncCron
+# values in src/datasets. Free plan: max 5 cron triggers per account.
+crons = ["*/10 * * * *"]

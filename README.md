@@ -113,17 +113,23 @@ Notes:
 
 Notes:
 - Source: mainnet-beta stake accounts whose `lockup.unix_timestamp` is in
-  the future, read hourly (cron `5 * * * *`, its own invocation) with
-  `getProgramAccounts` filtered by the timestamp's 4th byte (9 windows of
-  ~194 days, ~4.8 years ahead). No lockup uses `lockup.epoch` as of
-  2026-11. The parsed list is stored as one `rpc_snapshot` row (~150 KB);
-  requests read that row. A failed refresh keeps the previous snapshot;
-  snapshots older than 7 days are not served.
-- Only `api.mainnet-beta.solana.com` serves these queries for free
-  (PublicNode requires a personal token for `getProgramAccounts`).
+  the future, read with `getProgramAccounts` filtered by the timestamp's
+  4th byte (9 windows of ~194 days, ~4.8 years ahead). No lockup uses
+  `lockup.epoch` as of 2026-11.
+- Refreshed hourly by the GitHub Actions workflow **Refresh SOL lockups**
+  (`.github/workflows/refresh-lockups.yml`, `scripts/refresh-lockups.ts`):
+  mainnet-beta answers these queries with HTTP 403 when they come from
+  Cloudflare (first production runs, 2026-11-16), and PublicNode requires a
+  personal token for `getProgramAccounts`. The workflow pushes the parsed
+  list to `POST /internal/ingest/solana-unlocks`, authenticated with its
+  GitHub OIDC token (repository `zuo305/chain-data-agent`, ref
+  `refs/heads/main`, audience = the Worker URL; see `src/platform/ingest.ts`
+  and `oidc.ts`), so no secret is needed. The Worker stores it as one
+  `rpc_snapshot` row (~150 KB); requests read that row. A failed refresh
+  keeps the previous snapshot; snapshots older than 7 days are not served.
 - 2026-11-15 snapshot: 719 lockups, 16.48M SOL locked (15.83M delegated),
-  1.03M SOL unlocking in the next 30 days, last unlock 2028-11-11. Refresh:
-  ~6.6 s wall time. Request CPU: < 1.5 ms (dates are grouped by day number;
+  1.03M SOL unlocking in the next 30 days, last unlock 2028-11-11. Collection
+  takes ~6 s. Request CPU: < 1.5 ms (dates are grouped by day number;
   base58 keys are encoded only for returned rows and memoised).
 - A lockup end makes SOL withdrawable, not sold; delegated stake must be
   deactivated (about one epoch) first, and the custodian can lift a lockup

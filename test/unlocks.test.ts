@@ -9,9 +9,11 @@ import {
   decodeBase58,
   keyFromB64,
   keyToB64,
+  collectLockups,
   loadLockups,
   parseLockup,
-  refreshLockups,
+  storeLockups,
+  validateSnapshot,
 } from "../src/datasets/solana-unlocks/lockups";
 import { calendar, periodOf, summary, unlockList } from "../src/datasets/solana-unlocks/stats";
 import { mountDatasets, syncDatasets, type Dataset } from "../src/platform/dataset";
@@ -68,16 +70,14 @@ describe("lockup parsing", () => {
   });
 });
 
-describe("lockup refresh", () => {
+describe("lockup collection and storage", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.useRealTimers();
   });
 
-  it("stores one snapshot row from all windows and keeps it when a refresh fails", async () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(new Date("2026-11-15T00:00:00Z"));
-    const now = Math.floor(Date.now() / 1000);
+  it("collects pending lockups from every window and fails as a whole", async () => {
+    const now = ts("2026-11-15T00:00:00Z");
     let calls = 0;
     vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
       calls++;
@@ -94,23 +94,28 @@ describe("lockup refresh", () => {
           : [];
       return Response.json({ jsonrpc: "2.0", id: 1, result });
     });
-    const db = createTestD1();
-    expect(await refreshLockups({ DB: db } as never)).toBe(2);
+    const lockups = await collectLockups("https://rpc.test", now);
     expect(calls).toBe(9);
-    const snapshot = (await loadLockups({ DB: db } as never))!;
-    expect(snapshot.lockups.map((l) => l[2])).toEqual([now + DAY, now + 2 * DAY]);
+    expect(lockups.map((l) => l[2])).toEqual([now + DAY, now + 2 * DAY]);
 
     vi.stubGlobal("fetch", async () => new Response("forbidden", { status: 403 }));
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    expect(await refreshLockups({ DB: db } as never)).toBe(0);
-    expect((await loadLockups({ DB: db } as never))!.lockups).toHaveLength(2);
+    await expect(collectLockups("https://rpc.test", now)).rejects.toThrow("HTTP 403");
   });
 
-  it("is not served once it is more than a week old", async () => {
+  it("validates pushed snapshots", () => {
+    const now = Date.now();
+    const good = { refreshedAt: now, lockups: fixture.lockups };
+    expect(validateSnapshot(good, now)).toEqual(good);
+    expect(validateSnapshot({ refreshedAt: now - 2 * DAY * 1000, lockups: [] }, now)).toMatch(/recent/);
+    expect(validateSnapshot({ refreshedAt: now, lockups: [["x", 1, 2, "a", "b", ""]] }, now)).toMatch(/each lockup/);
+    expect(validateSnapshot({ refreshedAt: now, lockups: "nope" }, now)).toMatch(/array/);
+  });
+
+  it("stores the snapshot and does not serve it once it is more than a week old", async () => {
     const db = createTestD1();
-    db.sqlite
-      .prepare("INSERT INTO rpc_snapshot (call_key, fetched_at, body) VALUES (?, ?, ?)")
-      .run(LOCKUPS_KEY, Date.now() - 8 * DAY * 1000, JSON.stringify(fixture));
+    await storeLockups({ DB: db } as never, { ...fixture, refreshedAt: Date.now() });
+    expect((await loadLockups({ DB: db } as never))!.lockups).toHaveLength(fixture.lockups.length);
+    db.sqlite.prepare("UPDATE rpc_snapshot SET fetched_at = ? WHERE call_key = ?").run(Date.now() - 8 * DAY * 1000, LOCKUPS_KEY);
     expect(await loadLockups({ DB: db } as never)).toBeNull();
   });
 });

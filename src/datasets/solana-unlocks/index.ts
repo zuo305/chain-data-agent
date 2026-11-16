@@ -1,14 +1,15 @@
 import type { Context } from "hono";
 import type { AppEnv } from "../../types";
 import { type Attribution, type Dataset, badRequest, dataResponse } from "../../platform/dataset";
-import { CRONS } from "../../service";
-import { type LockupSnapshot, keyToB64, loadLockups, refreshLockups } from "./lockups";
+import { type LockupSnapshot, keyToB64, loadLockups, storeLockups, validateSnapshot } from "./lockups";
 import { GROUPS, type Group, calendar, isoTime, summary, unlockList } from "./stats";
 import { CALENDAR_EXAMPLE, SUMMARY_EXAMPLE, UNLOCKS_EXAMPLE } from "./examples";
 
 // Calendar of SOL that becomes withdrawable when stake account lockups
-// expire. Read hourly from mainnet-beta stake accounts (lockup.unix_timestamp
-// still in the future) into one D1 row; requests filter and aggregate it.
+// expire. An hourly GitHub Actions workflow reads mainnet-beta stake accounts
+// (lockup.unix_timestamp still in the future) and pushes them to
+// /internal/ingest/solana-unlocks, stored as one D1 row; requests filter and
+// aggregate it.
 
 export const ATTRIBUTION: Attribution = {
   publisher: "Solana mainnet-beta (stake account lockups via JSON-RPC)",
@@ -120,8 +121,12 @@ export const solanaUnlocks: Dataset = {
     "the individual unlocks with filters. Read from chain state hourly.",
   attribution: ATTRIBUTION,
   tags: ["solana", "unlocks", "vesting", "supply", "staking"],
-  sync: refreshLockups,
-  syncCron: CRONS.hourly,
+  ingest: async (c, body) => {
+    const snapshot = validateSnapshot(body);
+    if (typeof snapshot === "string") return badRequest(c, snapshot);
+    await storeLockups(c.env, snapshot);
+    return c.json({ stored: snapshot.lockups.length });
+  },
   status: async (env) => {
     const s = await loadLockups(env);
     return s ? { lockups: s.lockups.length, ...freshness(s) } : { lockups: 0, refreshed_at: null };
