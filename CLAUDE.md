@@ -82,6 +82,10 @@ the same burst (the CDP discovery API, `/platform/v2/x402/discovery/merchant
 ?payTo=<recipient>`, names the services). Known sampler: `0xaa34…1db3` pays
 20-28 unrelated x402 services (weather, fortune demos, JSON validators, chat
 models, ...) every 6 hours at 01/07/13/19 UTC, including our cheapest route.
+Other known verifiers: `0x171d…0fca` (PayAPI Market review, one call per
+newly submitted route), `0xa1d1…1978` (SettledScout, settled.tools: pays each
+x402 service once, ~200 recipients a day) and `0x82ce…6f86` (pays ~2,700
+calls to ~860 recipients a day; shares a client id with SettledScout).
 
 ## Calling production
 
