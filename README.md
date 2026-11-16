@@ -227,7 +227,7 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 ### M2 — Next experiments (each one only after a demand check)
 - [x] Token unlock feasibility check (2026-11-15): 9 of 23 large upcoming unlocks readable on-chain, the largest (MON) and most L1 unlocks custodial; a general calendar is not feasible. See `notes/research/2026-11-15-token-unlocks-feasibility.md`
 - [x] SOL stake unlock calendar (`solana-unlocks`, 2026-11-16): 1 free + 2 paid endpoints from an hourly stake lockup snapshot
-- [ ] List the unlock endpoints in the directories (402 Index, agent-tools.cloud, PayAPI)
+- [x] Unlock endpoints listed (2026-11-16): `/calendar` and `/unlocks` live on 402 Index (domain already verified) and agent-tools.cloud (auto-verified); PayAPI Market submissions pending review (its review pays one call per route)
 - [ ] Solana vesting escrows by mint (Streamflow + Jupiter Lock), if the unlock calendar finds users
 - [ ] Validator history (needs storage, e.g. a daily GitHub Actions snapshot) once the live endpoints have users
 - [ ] Ethereum validators: on hold (≈1M validators do not fit the free D1 tier; operator labels have licence issues)
