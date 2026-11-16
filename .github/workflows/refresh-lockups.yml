@@ -3,9 +3,17 @@ name: Refresh SOL lockups
 # Hourly: collects pending SOL stake lockups from mainnet-beta and pushes them
 # to the Worker (mainnet-beta refuses getProgramAccounts from Cloudflare).
 # Authenticated with this workflow's OIDC token; no secrets needed.
+# Also runs when the collector changes, since GitHub can delay the first
+# scheduled runs of a new workflow by hours.
 on:
   schedule:
     - cron: "23 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/refresh-lockups.yml
+      - scripts/refresh-lockups.ts
+      - src/datasets/solana-unlocks/lockups.ts
   workflow_dispatch:
 
 permissions:
