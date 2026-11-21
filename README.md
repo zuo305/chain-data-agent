@@ -222,7 +222,7 @@ curl -i "localhost:8787/v1/solana-validators/validator?vote=JDMq8hxZnad2smKLGkFb
 - [ ] mcpservers.org: web form (owner to submit)
 - [ ] Glama, PulseMCP: pick servers up from the MCP Registry automatically; Smithery and AllMCPs need the owner's account
 - [ ] First paid call from an agent that is not a directory, verifier or probe
-- [ ] Decide after ~2 weeks of listings: keep, change or drop Solana validator stats
+- [x] Review after ~1 week of listings (2026-11-21, `notes/reports/2026-11-21-review.md`, covers both projects): 36k requests, 90% bots, 15 paid calls all from verifiers, no client used a tool or free call. Recommendation: keep running unattended, research x402 demand on-chain before building more, stop active work if no non-verifier payment or free call by 2026-12-21
 
 ### M2 — Next experiments (each one only after a demand check)
 - [x] Token unlock feasibility check (2026-11-15): 9 of 23 large upcoming unlocks readable on-chain, the largest (MON) and most L1 unlocks custodial; a general calendar is not feasible. See `notes/research/2026-11-15-token-unlocks-feasibility.md`
