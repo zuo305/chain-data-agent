@@ -254,9 +254,13 @@ export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
   return async (c, next) => {
     // API key holders are billed by the partner that issued their access
     if (c.get("tier") === "api_key") return next();
+    // HEAD is served by the GET handler (with the body dropped), so it targets
+    // the GET endpoint's price too
+    const method = c.req.method === "HEAD" ? "GET" : c.req.method;
+    const target = findPaidEndpoint(datasets, method, c.req.path);
     const config = readX402Config(c.env);
     if (!config) {
-      if (findPaidEndpoint(datasets, c.req.method, c.req.path)) {
+      if (target) {
         return c.json(
           { error: "payments_not_configured", message: "Paid endpoints are not enabled on this deployment yet." },
           503
@@ -266,7 +270,12 @@ export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
     }
 
     // Free routes never need the facilitator (the middleware only acts on paid routes)
-    if (!findPaidEndpoint(datasets, c.req.method, c.req.path)) return next();
+    if (!target) return next();
+    // A HEAD cannot carry a useful paid answer: say the route is paid without
+    // running the handler or calling the facilitator
+    if (c.req.method === "HEAD") {
+      return new Response(null, { status: 402, headers: { "Cache-Control": "no-store" } });
+    }
     const paid = Boolean(c.req.header("payment-signature") || c.req.header("x-payment"));
 
     let server: x402ResourceServer;
@@ -318,7 +327,7 @@ export function x402Payments(datasets: Dataset[]): MiddlewareHandler<AppEnv> {
     }
     // Unpaid request: show what the call would return before the agent pays
     if (res instanceof Response && res.status === 402 && !paid && c.req.method === "GET") {
-      return withPreview(c, res, findPaidEndpoint(datasets, c.req.method, c.req.path));
+      return withPreview(c, res, target);
     }
     return res;
   };

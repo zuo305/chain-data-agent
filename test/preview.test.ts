@@ -196,6 +196,37 @@ describe("x402 initialization", () => {
   });
 });
 
+describe("HEAD on paid routes", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("answers 402 without running the handler or calling the facilitator", async () => {
+    let calls = 0;
+    vi.stubGlobal("fetch", async () => {
+      calls++; // neither the facilitator nor Solana RPC may be contacted
+      return new Response("unexpected", { status: 500 });
+    });
+    const env = {
+      DB: createTestD1(),
+      X402_PAY_TO: "0x0000000000000000000000000000000000000001",
+      X402_NETWORK: "eip155:84532",
+      X402_FACILITATOR_URL: "https://facilitator-head.test",
+    };
+    for (const path of ["/v1/solana-validators/validators?limit=2", "/v1/solana-validators/validator"]) {
+      const res = await app.request(`https://example.test${path}`, { method: "HEAD" }, env, ctx);
+      expect(res.status, path).toBe(402);
+      expect(await res.text()).toBe("");
+    }
+    expect(calls).toBe(0);
+  });
+
+  it("still serves HEAD on free routes", async () => {
+    stubSolanaRpc();
+    const env = { DB: createTestD1(), X402_PAY_TO: "0x0000000000000000000000000000000000000001", X402_NETWORK: "eip155:84532" };
+    const res = await app.request("https://example.test/v1/solana-validators/summary", { method: "HEAD" }, env, ctx);
+    expect(res.status).toBe(200);
+  });
+});
+
 describe("x402 facilitator outage", () => {
   afterEach(() => vi.unstubAllGlobals());
 
