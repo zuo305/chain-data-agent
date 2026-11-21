@@ -86,6 +86,9 @@ Other known verifiers: `0x171d…0fca` (PayAPI Market review, one call per
 newly submitted route), `0xa1d1…1978` (SettledScout, settled.tools: pays each
 x402 service once, ~200 recipients a day) and `0x82ce…6f86` (pays ~2,700
 calls to ~860 recipients a day; shares a client id with SettledScout).
+Also `0x4c29…9494` (usetested.com harness: 10 calls in 40 s, ~600 payments
+to ~50 services a day) and `0x08ed…d5f7` (slow sampler: one call to a
+different x402 service every ~12 hours since 2026-11-06, never repeats).
 
 ## Calling production
 
